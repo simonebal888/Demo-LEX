@@ -1439,7 +1439,7 @@
             </div>
         </div>
 
-        <!-- MODALE BARRA DI CARICAMENTO -->
+<!-- MODALE BARRA DI CARICAMENTO -->
         <div class="modal-overlay" id="loadingModal">
             <div class="modal-content" style="max-width:480px;">
                 <div style="font-size:48px; margin-bottom:20px;">⚙️</div>
@@ -1451,8 +1451,7 @@
                 <div style="font-size:11px; color:#999;" id="loadingPercent">0%</div>
             </div>
         </div>
-            </div>
-        </div>
+
         <script>
             // Dati CSV (simulati)
             const superficiCaratteristiche = [
@@ -2316,12 +2315,7 @@
                 next();
             }
 
-            // Chiude il modale cliccando fuori dal contenuto bianco
-            modal.addEventListener('click', (e) => {
-                if(e.target === modal) {
-                    modal.classList.remove('show');
-                }
-            });
+
            // ========== CHATBOT UNDERWRITING ==========
             const chatbotState = {
                 step: 0,
