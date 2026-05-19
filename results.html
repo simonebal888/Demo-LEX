@@ -600,9 +600,13 @@
 
         <div class="form-card">
             <div class="immobile-header" id="immobileHeader">
-                <div class="button-group">
-<button type="button" class="btn btn-primary" id="downloadVisuraBtn">Richiedi Visura</button>
-<button type="button" class="btn btn-primary" id="downloadPlanimetriaBtn">Richiedi Planimetria</button>
+               <div class="button-group">
+                    <button type="button" class="btn btn-primary" id="downloadVisuraBtn">Richiedi Visura</button>
+                    <button type="button" class="btn btn-primary" id="downloadPlanimetriaBtn">Richiedi Planimetria</button>
+                </div>
+                <div id="documentiScaricati" style="margin-top: 20px; display: none;">
+                    <div style="font-size: 12px; font-weight: 600; color: #666666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Documenti scaricati</div>
+                    <div id="listaDocumenti" style="display: flex; flex-direction: column; gap: 8px;"></div>
                 </div>
             </div>
         </div>
@@ -2233,7 +2237,7 @@
             document.getElementById('downloadVisuraBtn').addEventListener('click', () => {
                 modalIcon.textContent = '📄';
                 modalTitle.innerText = "Richiedi Visura Catastale";
-                modalMessage.innerHTML = "Stai per richiedere la <strong>visura catastale aggiornata</strong> al service provider LEX. Confermi la richiesta?";
+                modalMessage.innerHTML = "Stai per richiedere la <strong>visura catastale aggiornata</strong>. Confermi la richiesta?";
                 modalCostInfo.style.display = 'none';
                 confirmBtn.textContent = 'Conferma e richiedi';
                 currentDownloadType = 'visura';
@@ -2244,7 +2248,7 @@
             document.getElementById('downloadPlanimetriaBtn').addEventListener('click', () => {
                 modalIcon.textContent = '📐';
                 modalTitle.innerText = "Richiedi Planimetria Catastale";
-                modalMessage.innerHTML = "Stai per richiedere la <strong>planimetria catastale</strong> al service provider LEX.";
+                modalMessage.innerHTML = "Stai per richiedere la <strong>planimetria catastale</strong>.";
                 modalCostInfo.style.display = 'block';
                 confirmBtn.textContent = 'Conferma e procedi';
                 currentDownloadType = 'planimetria';
@@ -2270,6 +2274,40 @@
             });
 
             // Simula chiamata API al provider LEX con barra progresso
+            // Aggiunge alla lista i documenti scaricati (deduplicato)
+            function aggiungiDocumentoScaricato(tipo, fileUrl, fileName) {
+                const container = document.getElementById('documentiScaricati');
+                const lista = document.getElementById('listaDocumenti');
+                const idLink = 'linkDoc-' + tipo;
+
+                // Se il link già esiste, non lo aggiunge di nuovo
+                if (document.getElementById(idLink)) return;
+
+                const label = tipo === 'planimetria' ? 'Planimetria Catastale' : 'Visura Catastale';
+                const icona = tipo === 'planimetria' ? '📐' : '📄';
+                const dataOra = new Date().toLocaleString('it-IT', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+
+                const item = document.createElement('a');
+                item.id = idLink;
+                item.href = fileUrl;
+                item.download = fileName;
+                item.style.cssText = 'display: flex; align-items: center; gap: 12px; padding: 12px 16px; background-color: #f9f9f9; border-left: 3px solid #86BC25; border-radius: 6px; text-decoration: none; color: #333; transition: background-color 0.2s;';
+                item.onmouseover = () => item.style.backgroundColor = '#f0f0f0';
+                item.onmouseout = () => item.style.backgroundColor = '#f9f9f9';
+                item.innerHTML = `
+                    <span style="font-size: 24px;">${icona}</span>
+                    <div style="flex: 1;">
+                        <div style="font-size: 14px; font-weight: 600; color: #007CB0;">${label}</div>
+                        <div style="font-size: 11px; color: #666; margin-top: 2px;">Scaricata il ${dataOra} · ${fileName}</div>
+                    </div>
+                    <span style="font-size: 18px; color: #86BC25;">⬇</span>
+                `;
+                lista.appendChild(item);
+                container.style.display = 'block';
+            }
             function avviaCaricamento(tipo) {
                 const fileUrl = tipo === 'planimetria' ? 'planimetria.pdf' : 'visura.pdf';
                 const fileName = tipo === 'planimetria' ? 'planimetria.pdf' : 'visura.pdf';
@@ -2292,13 +2330,15 @@
                 let i = 0;
                 function next() {
                     if (i >= steps.length) {
-                        // Avvia il download reale
+// Avvia il download reale
                         const link = document.createElement('a');
                         link.href = fileUrl;
                         link.download = fileName;
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
+                        // Aggiunge il documento alla lista visibile
+                        aggiungiDocumentoScaricato(tipo, fileUrl, fileName);
                         // Chiude la modale dopo un attimo
                         setTimeout(() => {
                             loadingModal.classList.remove('show');
