@@ -1254,7 +1254,36 @@
                             <p style="margin-bottom: 15px; line-height: 1.8; font-size: 14px;">La polizza consente di combinare liberamente le diverse sezioni di copertura e di adeguarle nel tempo in funzione dell’evoluzione delle esigenze, senza dover rinnovare l’intero contratto.</p> 
                             <p style="margin-bottom: 15px; line-height: 1.8; font-size: 14px;"><strong>Coperture principali:</strong></p>
                             <p style="margin-bottom: 15px; line-height: 1.8; font-size: 14px;"><ul><li>Incendio e Altri Danni ai Beni: protezione dell’immobile e del contenuto contro incendio, esplosione, scoppio ed eventi accidentali.</li> <li>Eventi Naturali e Calamità: copertura per danni derivanti da eventi atmosferici intensi, alluvioni, frane o altri fenomeni naturali che possano compromettere la struttura o il contenuto dell’abitazione.</li> <li>Copertura Sismica: garanzia personalizzabile contro i danni da terremoto, con possibilità di modulare massimali e franchigie in base al valore e al livello di rischio sismico dell’immobile.</li> <li>Danni da Acqua: tutela dai danni provocati da perdite accidentali di impianti idrici o da infiltrazioni, anche in aree non classificate a rischio elevato.</li> <li>Assistenza H24 e Responsabilità Civile verso Terzi: servizio di pronto intervento per guasti domestici e protezione per danni involontari causati a terzi o a parti comuni dell’edificio.</li></ul></p>
+</div>
+
+                    <!-- NUOVA SEZIONE: PROFILO COPERTURE E SERVIZI -->
+                    <div class="section-title">Profilo Coperture e Servizi Aggiuntivi</div>
+                    <div class="info-box" style="background-color: #f0f7ff; border-left: 4px solid #007CB0; padding: 20px; margin-bottom: 30px;">
+                        <p style="line-height: 1.8; font-size: 14px;">Il grafico a ragno confronta il <strong>profilo di esposizione al rischio</strong> dell'immobile con il <strong>livello di copertura</strong> garantito dalla polizza proposta. Più i due poligoni si sovrappongono, più la protezione è allineata al rischio specifico dell'immobile.</p>
+                    </div>
+                    <div class="chart-container" style="height: 450px;">
+                        <canvas id="chartCoperture"></canvas>
+                    </div>
+
+                    <div class="section-title" style="margin-top: 40px;">Servizio Meteo & Alerting Grandine</div>
+                    <div class="info-box" style="background-color: #f0f7ff; border-left: 4px solid #007CB0; padding: 20px; margin-bottom: 20px;">
+                        <p style="line-height: 1.8; font-size: 14px;">Servizio di allerta meteo dedicato all'immobile assicurato. Riceverai notifiche preventive in caso di previsioni di grandine, vento forte o precipitazioni intense per attivare misure di protezione.</p>
+                    </div>
+                    <div id="meteoWidget" style="background: linear-gradient(135deg, #007CB0 0%, #003d66 100%); color: white; padding: 25px; border-radius: 8px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+                            <div>
+                                <div style="font-size: 13px; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;">Previsioni meteo</div>
+                                <div style="font-size: 22px; font-weight: 600;" id="meteoLocation">Norcia (PG)</div>
+                                <div style="font-size: 12px; opacity: 0.85; margin-top: 4px;" id="meteoUpdate">Caricamento dati...</div>
+                            </div>
+                            <button class="btn btn-primary" id="attivaServizioMeteoBtn" style="background: white; color: #007CB0;">Attiva servizio</button>
                         </div>
+                        <div id="meteoForecast" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 25px;">
+                            <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 6px;">
+                                <div style="font-size: 12px; opacity: 0.85;">Caricamento...</div>
+                            </div>
+                        </div>
+                    </div>
                     </div>
                 </div>
             </div>
