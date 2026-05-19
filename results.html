@@ -1456,6 +1456,23 @@
             </div>
         </div>
 
+<!-- MODALE VISUALIZZAZIONE PDF -->
+        <div class="modal-overlay" id="pdfViewerModal" style="z-index: 2100;">
+            <div style="background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); width: 90%; max-width: 1000px; height: 90vh; display: flex; flex-direction: column; overflow: hidden;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: linear-gradient(135deg, #86BC25 0%, #007CB0 100%); color: white;">
+                    <div>
+                        <div style="font-size: 16px; font-weight: 600;" id="pdfViewerTitle">Documento</div>
+                        <div style="font-size: 11px; opacity: 0.85; margin-top: 2px;" id="pdfViewerSubtitle">-</div>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <a id="pdfViewerDownload" href="#" download style="background: rgba(255,255,255,0.2); color: white; padding: 8px 14px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">⬇ Scarica</a>
+                        <button id="pdfViewerClose" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 8px; line-height: 1;">✕</button>
+                    </div>
+                </div>
+                <iframe id="pdfViewerFrame" src="" style="flex: 1; border: none; width: 100%;"></iframe>
+            </div>
+        </div>
+    
         <script>
             // Dati CSV (simulati)
             const superficiCaratteristiche = [
@@ -2274,7 +2291,7 @@
             });
 
             // Simula chiamata API al provider LEX con barra progresso
-            // Aggiunge alla lista i documenti scaricati (deduplicato)
+           // Aggiunge alla lista i documenti scaricati (deduplicato)
             function aggiungiDocumentoScaricato(tipo, fileUrl, fileName) {
                 const container = document.getElementById('documentiScaricati');
                 const lista = document.getElementById('listaDocumenti');
@@ -2290,24 +2307,53 @@
                     hour: '2-digit', minute: '2-digit'
                 });
 
-                const item = document.createElement('a');
+                const item = document.createElement('div');
                 item.id = idLink;
-                item.href = fileUrl;
-                item.download = fileName;
-                item.style.cssText = 'display: flex; align-items: center; gap: 12px; padding: 12px 16px; background-color: #f9f9f9; border-left: 3px solid #86BC25; border-radius: 6px; text-decoration: none; color: #333; transition: background-color 0.2s;';
+                item.style.cssText = 'display: flex; align-items: center; gap: 12px; padding: 12px 16px; background-color: #f9f9f9; border-left: 3px solid #86BC25; border-radius: 6px; cursor: pointer; transition: background-color 0.2s;';
                 item.onmouseover = () => item.style.backgroundColor = '#f0f0f0';
                 item.onmouseout = () => item.style.backgroundColor = '#f9f9f9';
+                item.onclick = () => apriPdfViewer(fileUrl, fileName, label);
                 item.innerHTML = `
                     <span style="font-size: 24px;">${icona}</span>
                     <div style="flex: 1;">
                         <div style="font-size: 14px; font-weight: 600; color: #007CB0;">${label}</div>
-                        <div style="font-size: 11px; color: #666; margin-top: 2px;">Scaricata il ${dataOra} · ${fileName}</div>
+                        <div style="font-size: 11px; color: #666; margin-top: 2px;">Scaricata il ${dataOra} · clicca per visualizzare</div>
                     </div>
-                    <span style="font-size: 18px; color: #86BC25;">⬇</span>
+                    <span style="font-size: 18px; color: #86BC25;">👁</span>
                 `;
                 lista.appendChild(item);
                 container.style.display = 'block';
             }
+
+            // Apre il viewer PDF in modale
+            function apriPdfViewer(fileUrl, fileName, label) {
+                const modal = document.getElementById('pdfViewerModal');
+                const frame = document.getElementById('pdfViewerFrame');
+                const title = document.getElementById('pdfViewerTitle');
+                const subtitle = document.getElementById('pdfViewerSubtitle');
+                const downloadLink = document.getElementById('pdfViewerDownload');
+
+                title.textContent = label;
+                subtitle.textContent = fileName;
+                frame.src = fileUrl;
+                downloadLink.href = fileUrl;
+                downloadLink.download = fileName;
+                modal.classList.add('show');
+            }
+
+            // Chiusura modale PDF viewer
+            document.getElementById('pdfViewerClose').addEventListener('click', () => {
+                const modal = document.getElementById('pdfViewerModal');
+                modal.classList.remove('show');
+                document.getElementById('pdfViewerFrame').src = '';
+            });
+            document.getElementById('pdfViewerModal').addEventListener('click', (e) => {
+                if (e.target.id === 'pdfViewerModal') {
+                    document.getElementById('pdfViewerModal').classList.remove('show');
+                    document.getElementById('pdfViewerFrame').src = '';
+                }
+            });
+
             function avviaCaricamento(tipo) {
                 const fileUrl = tipo === 'planimetria' ? 'planimetria.pdf' : 'visura.pdf';
                 const fileName = tipo === 'planimetria' ? 'planimetria.pdf' : 'visura.pdf';
