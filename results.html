@@ -601,8 +601,8 @@
         <div class="form-card">
             <div class="immobile-header" id="immobileHeader">
                 <div class="button-group">
-                   <a href="visura.pdf" download class="btn btn-primary" id="downloadVisuraBtn">Scarica Visura</a>
-                   <a href="planimetria.pdf" download class="btn btn-primary" id="downloadPlanimetriaBtn">Scarica Planimetria</a>
+<button type="button" class="btn btn-primary" id="downloadVisuraBtn">Richiedi Visura</button>
+<button type="button" class="btn btn-primary" id="downloadPlanimetriaBtn">Richiedi Planimetria</button>
                 </div>
             </div>
         </div>
@@ -1422,16 +1422,35 @@
             <div class="chatbot-messages" id="chatbotMessages"></div>
             <div class="chatbot-options" id="chatbotOptions"></div>
         </div>
-        <!-- STRUTTURA DEL MODALE (MESSAGGIO DI AVVISO) -->
+      <!-- STRUTTURA DEL MODALE (CONFERMA RICHIESTA) -->
         <div class="modal-overlay" id="downloadModal">
             <div class="modal-content">
-                <div class="modal-icon">📄</div>
-                <div class="modal-title" id="modalTitle">Conferma Download</div>
-                <div class="modal-message" id="modalMessage">Stai per scaricare il documento selezionato. Vuoi procedere?</div>
+                <div class="modal-icon" id="modalIcon">📄</div>
+                <div class="modal-title" id="modalTitle">Conferma Richiesta</div>
+                <div class="modal-message" id="modalMessage">Stai per richiedere il documento. Vuoi procedere?</div>
+                <div id="modalCostInfo" style="display:none; background-color:#fff3cd; border-left:4px solid #FBC02D; padding:14px 18px; border-radius:4px; margin-bottom:20px; text-align:left;">
+                    <div style="font-size:13px; color:#856404; font-weight:600; margin-bottom:4px;">⚠ Costo del servizio</div>
+                    <div style="font-size:13px; color:#333;">La richiesta della planimetria comporta un costo aggiuntivo di <strong>€ 1,35</strong> che sarà addebitato sull'account aziendale.</div>
+                </div>
                 <div class="modal-buttons">
                     <button class="btn btn-secondary" id="cancelDownloadBtn">Annulla</button>
-                    <button class="btn btn-primary" id="confirmDownloadBtn">Scarica</button>
+                    <button class="btn btn-primary" id="confirmDownloadBtn">Conferma e richiedi</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- MODALE BARRA DI CARICAMENTO -->
+        <div class="modal-overlay" id="loadingModal">
+            <div class="modal-content" style="max-width:480px;">
+                <div style="font-size:48px; margin-bottom:20px;">⚙️</div>
+                <div class="modal-title" id="loadingTitle">Richiesta in corso</div>
+                <div id="loadingStatus" style="font-size:13px; color:#666; margin-bottom:24px; min-height:20px;">Connessione al service provider LEX...</div>
+                <div style="background-color:#e0e0e0; height:10px; border-radius:5px; overflow:hidden; margin-bottom:12px;">
+                    <div id="loadingBar" style="background:linear-gradient(135deg, #86BC25 0%, #007CB0 100%); height:100%; width:0%; transition:width 0.3s ease;"></div>
+                </div>
+                <div style="font-size:11px; color:#999;" id="loadingPercent">0%</div>
+            </div>
+        </div>
             </div>
         </div>
         <script>
@@ -2195,63 +2214,107 @@
             // Carica i dati al caricamento della pagina
             window.addEventListener('load', loadData);
 
-            // Riferimenti agli elementi del Modale
+// Riferimenti agli elementi del Modale
             const modal = document.getElementById('downloadModal');
             const modalTitle = document.getElementById('modalTitle');
             const modalMessage = document.getElementById('modalMessage');
+            const modalIcon = document.getElementById('modalIcon');
+            const modalCostInfo = document.getElementById('modalCostInfo');
             const cancelBtn = document.getElementById('cancelDownloadBtn');
             const confirmBtn = document.getElementById('confirmDownloadBtn');
+            const loadingModal = document.getElementById('loadingModal');
+            const loadingTitle = document.getElementById('loadingTitle');
+            const loadingStatus = document.getElementById('loadingStatus');
+            const loadingBar = document.getElementById('loadingBar');
+            const loadingPercent = document.getElementById('loadingPercent');
 
             let currentDownloadType = '';
 
-            // Click su Scarica Planimetria
-            document.getElementById('downloadPlanimetriaBtn').addEventListener('click', () => {
-                modalTitle.innerText = "Download Planimetria";
-                // Usa innerHTML qui sotto:
-                modalMessage.innerHTML = "Il download della planimetria <strong>porterà ad un addebito diretto del costo pattuito per questo documento</strong>. Confermi l'operazione?";
-                currentDownloadType = 'planimetria';
-                modal.classList.add('show');
-            });
-
-            // Click su Scarica Visura
+            // Click su Richiedi Visura
             document.getElementById('downloadVisuraBtn').addEventListener('click', () => {
-                modalTitle.innerText = "Download Visura";
-                // Usa innerHTML qui sotto (se vorrai aggiungere grassetti anche qui):
-                modalMessage.innerHTML = "Stai per scaricare la visura catastale aggiornata. Confermi?";
+                modalIcon.textContent = '📄';
+                modalTitle.innerText = "Richiedi Visura Catastale";
+                modalMessage.innerHTML = "Stai per richiedere la <strong>visura catastale aggiornata</strong> al service provider LEX. Confermi la richiesta?";
+                modalCostInfo.style.display = 'none';
+                confirmBtn.textContent = 'Conferma e richiedi';
                 currentDownloadType = 'visura';
                 modal.classList.add('show');
             });
 
-            // Click su Annulla chiude il modale
+            // Click su Richiedi Planimetria
+            document.getElementById('downloadPlanimetriaBtn').addEventListener('click', () => {
+                modalIcon.textContent = '📐';
+                modalTitle.innerText = "Richiedi Planimetria Catastale";
+                modalMessage.innerHTML = "Stai per richiedere la <strong>planimetria catastale</strong> al service provider LEX.";
+                modalCostInfo.style.display = 'block';
+                confirmBtn.textContent = 'Conferma e procedi';
+                currentDownloadType = 'planimetria';
+                modal.classList.add('show');
+            });
+
+            // Annulla
             cancelBtn.addEventListener('click', () => {
                 modal.classList.remove('show');
             });
 
-            // Click su Conferma esegue l'azione di download
+            // Conferma → avvia barra di caricamento, poi scarica
             confirmBtn.addEventListener('click', () => {
                 modal.classList.remove('show');
-                
-                let fileUrl = '';
-                let fileName = '';
+                avviaCaricamento(currentDownloadType);
+            });
 
-                if (currentDownloadType === 'planimetria') {
-                    fileUrl = '/planimetria.pdf'; // Il percorso partendo dalla radice
-                    fileName = 'planimetria.pdf';  // Nome che prenderà il file scaricato
-                } else if (currentDownloadType === 'visura') {
-                    fileUrl = '/visura.pdf';
-                    fileName = 'visura.pdf';
-                }
-
-                if (fileUrl) {
-                    // Creiamo un elemento "a" temporaneo nell'HTML
-                    const link = document.createElement('a');
-                    link.href = fileUrl;
-                    link.download = fileName; // Forza il download invece dell'apertura
-                    document.body.appendChild(link);
-                    link.click();             // Simula il click dell'utente
-                    document.body.removeChild(link); // Rimuove l'elemento temporaneo
+            // Chiude il modale cliccando fuori
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
                 }
             });
+
+            // Simula chiamata API al provider LEX con barra progresso
+            function avviaCaricamento(tipo) {
+                const fileUrl = tipo === 'planimetria' ? 'planimetria.pdf' : 'visura.pdf';
+                const fileName = tipo === 'planimetria' ? 'planimetria.pdf' : 'visura.pdf';
+                const docLabel = tipo === 'planimetria' ? 'planimetria' : 'visura';
+
+                loadingTitle.textContent = `Richiesta ${docLabel} in corso`;
+                loadingBar.style.width = '0%';
+                loadingPercent.textContent = '0%';
+                loadingStatus.textContent = 'Connessione al service provider LEX...';
+                loadingModal.classList.add('show');
+
+                const steps = [
+                    { pct: 15, status: 'Connessione al service provider LEX...', delay: 600 },
+                    { pct: 35, status: 'Autenticazione e validazione richiesta...', delay: 700 },
+                    { pct: 60, status: `Recupero ${docLabel} dal Catasto...`, delay: 900 },
+                    { pct: 85, status: 'Elaborazione documento...', delay: 700 },
+                    { pct: 100, status: 'Download completato', delay: 500 }
+                ];
+
+                let i = 0;
+                function next() {
+                    if (i >= steps.length) {
+                        // Avvia il download reale
+                        const link = document.createElement('a');
+                        link.href = fileUrl;
+                        link.download = fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        // Chiude la modale dopo un attimo
+                        setTimeout(() => {
+                            loadingModal.classList.remove('show');
+                        }, 600);
+                        return;
+                    }
+                    const s = steps[i];
+                    loadingBar.style.width = s.pct + '%';
+                    loadingPercent.textContent = s.pct + '%';
+                    loadingStatus.textContent = s.status;
+                    i++;
+                    setTimeout(next, s.delay);
+                }
+                next();
+            }
 
             // Chiude il modale cliccando fuori dal contenuto bianco
             modal.addEventListener('click', (e) => {
