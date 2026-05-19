@@ -2259,15 +2259,16 @@
                     modal.classList.remove('show');
                 }
             });
-            // ========== CHATBOT ==========
+           // ========== CHATBOT UNDERWRITING ==========
             const chatbotState = {
                 step: 0,
                 history: [],
-                scelte: { obiettivo: null, tipoImmobile: null, copertura: null, massimale: null }
+                scelte: { linea: null, uso: null }
             };
 
             const moltiplicatoriCopertura = { 'Base': 1.0, 'Standard': 1.6, 'Premium': 2.2 };
             const moltiplicatoriUso = { 'Abitazione principale': 1.0, 'Seconda casa': 1.15, 'Investimento/affitto': 1.30 };
+            const TASSO_BASE = 0.0015;
 
             function calcolaPremio() {
                 const immobileId = getImmobileId();
@@ -2275,13 +2276,64 @@
                 const valoreImmobile = ive ? ive.valore_immobile : 100000;
                 const ivePercentuale = ive ? ive.ive_percentuale : 20;
 
-                const tassoBase = 0.0015;
-                const mc = moltiplicatoriCopertura[chatbotState.scelte.copertura] || 1.0;
-                const mu = moltiplicatoriUso[chatbotState.scelte.tipoImmobile] || 1.0;
+                const mc = moltiplicatoriCopertura[chatbotState.scelte.linea] || 1.0;
+                const mu = moltiplicatoriUso[chatbotState.scelte.uso] || 1.0;
                 const fattoreRischio = 1 + (ivePercentuale / 100);
 
-                const premio = valoreImmobile * tassoBase * mc * mu * fattoreRischio;
-                return { premio: Math.round(premio), valoreImmobile, ivePercentuale };
+                const premioBase = valoreImmobile * TASSO_BASE;
+                const caricamentoRischio = premioBase * mc * mu * (fattoreRischio - 1);
+                const premioTecnico = premioBase * mc * mu * fattoreRischio;
+
+                return {
+                    valoreImmobile,
+                    ivePercentuale,
+                    tasso: (TASSO_BASE * mc * mu * 100).toFixed(3),
+                    premioBase: Math.round(premioBase * mc * mu),
+                    caricamentoRischio: Math.round(caricamentoRischio),
+                    premioTecnico: Math.round(premioTecnico)
+                };
+            }
+
+            function verificaAccettabilita() {
+                const immobileId = getImmobileId();
+                const ive = iveData.find(i => i.immobile_id === immobileId);
+                const sismica = rischiSismicaData.find(s => s.immobile_id === immobileId);
+                const frane = rischiFrameData.find(f => f.immobile_id === immobileId);
+                const alluvioni = rischiAlluvioniData.find(a => a.immobile_id === immobileId);
+
+                const checks = [];
+
+                if (ive && ive.ive_percentuale > 30) {
+                    checks.push({ stato: 'warn', testo: `IVE elevato (${ive.ive_percentuale}%) — approvazione tecnica richiesta` });
+                } else if (ive) {
+                    checks.push({ stato: 'ok', testo: `IVE entro soglia (${ive.ive_percentuale}%)` });
+                }
+
+                if (sismica && ['Elevata', 'Molto Elevata'].includes(sismica.classificazione_sismica)) {
+                    checks.push({ stato: 'warn', testo: `Rischio sismico ${sismica.classificazione_sismica} — franchigia maggiorata consigliata` });
+                } else if (sismica) {
+                    checks.push({ stato: 'ok', testo: `Rischio sismico ${sismica.classificazione_sismica}` });
+                }
+
+                if (frane && ['Elevata', 'Molto Elevata'].includes(frane.livello_pericolosita)) {
+                    checks.push({ stato: 'critical', testo: `Pericolosità frane ${frane.livello_pericolosita} — esclusione o sovrappremio` });
+                } else if (frane) {
+                    checks.push({ stato: 'ok', testo: `Pericolosità frane ${frane.livello_pericolosita}` });
+                }
+
+                if (alluvioni && ['Elevata', 'Molto Elevata'].includes(alluvioni.livello_pericolosita)) {
+                    checks.push({ stato: 'critical', testo: `Pericolosità alluvioni ${alluvioni.livello_pericolosita} — esclusione o sovrappremio` });
+                } else if (alluvioni) {
+                    checks.push({ stato: 'ok', testo: `Pericolosità alluvioni ${alluvioni.livello_pericolosita}` });
+                }
+
+                return checks;
+            }
+
+            function generaNumeroPratica() {
+                const anno = new Date().getFullYear();
+                const num = Math.floor(1000 + Math.random() * 9000);
+                return `${anno}-PR-${num}`;
             }
 
             function chatbotAddMsg(testo, mittente) {
@@ -2327,74 +2379,125 @@
             function chatbotRender() {
                 switch (chatbotState.step) {
                     case 0:
-                        chatbotAddMsg("Buongiorno, sono l'assistente virtuale per la sottoscrizione di polizze Property. Come posso esserLe utile?", 'bot');
+                        chatbotAddMsg("Salve, sono il Suo assistente per la sottoscrizione. Posso aiutarLa a definire le condizioni assicurative per questo immobile. Su cosa vuole lavorare?", 'bot');
                         chatbotSetOptions([
-                            { label: 'Proteggere il mio immobile', action: () => { chatbotState.scelte.obiettivo = 'Protezione'; chatbotState.step = 1; chatbotRender(); } },
-                            { label: 'Avere informazioni', action: () => { chatbotState.scelte.obiettivo = 'Info'; chatbotState.step = 1; chatbotRender(); } },
-                            { label: 'Ottenere un preventivo', action: () => { chatbotState.scelte.obiettivo = 'Preventivo'; chatbotState.step = 1; chatbotRender(); } }
+                            { label: 'Calcolo premio di sottoscrizione', action: () => { chatbotState.step = 10; chatbotRender(); } },
+                            { label: 'Verifica accettabilità rischio', action: () => { chatbotState.step = 20; chatbotRender(); } },
+                            { label: 'Genera proposta di copertura', action: () => { chatbotState.step = 30; chatbotRender(); } }
                         ], false);
                         break;
-                    case 1:
-                        chatbotAddMsg("Mi indichi la tipologia dell'immobile da assicurare.", 'bot');
+
+                    // ===== RAMO CALCOLO PREMIO =====
+                    case 10:
+                        chatbotAddMsg("Quale linea di prodotto vuole quotare?<br><br><strong>Base</strong>: solo eventi catastrofali<br><strong>Standard</strong>: aggiunge incendio e danni d'acqua<br><strong>Premium</strong>: tutela completa con furto, RC e atti vandalici", 'bot');
                         chatbotSetOptions([
-                            { label: 'Abitazione principale', action: () => { chatbotState.scelte.tipoImmobile = 'Abitazione principale'; chatbotState.step = 2; chatbotRender(); } },
-                            { label: 'Seconda casa', action: () => { chatbotState.scelte.tipoImmobile = 'Seconda casa'; chatbotState.step = 2; chatbotRender(); } },
-                            { label: 'Investimento/affitto', action: () => { chatbotState.scelte.tipoImmobile = 'Investimento/affitto'; chatbotState.step = 2; chatbotRender(); } }
+                            { label: 'Base', action: () => { chatbotState.scelte.linea = 'Base'; chatbotState.step = 11; chatbotRender(); } },
+                            { label: 'Standard', action: () => { chatbotState.scelte.linea = 'Standard'; chatbotState.step = 11; chatbotRender(); } },
+                            { label: 'Premium', action: () => { chatbotState.scelte.linea = 'Premium'; chatbotState.step = 11; chatbotRender(); } }
                         ], true);
                         break;
-                    case 2:
-                        chatbotAddMsg("Quale livello di copertura preferisce? <br><br><strong>Base</strong>: solo eventi catastrofali<br><strong>Standard</strong>: aggiunge incendio e danni d'acqua<br><strong>Premium</strong>: tutela completa con furto, RC e atti vandalici", 'bot');
+                    case 11:
+                        chatbotAddMsg("Quale uso dell'immobile dichiara il contraente?", 'bot');
                         chatbotSetOptions([
-                            { label: 'Base', action: () => { chatbotState.scelte.copertura = 'Base'; chatbotState.step = 3; chatbotRender(); } },
-                            { label: 'Standard', action: () => { chatbotState.scelte.copertura = 'Standard'; chatbotState.step = 3; chatbotRender(); } },
-                            { label: 'Premium', action: () => { chatbotState.scelte.copertura = 'Premium'; chatbotState.step = 3; chatbotRender(); } }
+                            { label: 'Abitazione principale', action: () => { chatbotState.scelte.uso = 'Abitazione principale'; chatbotState.step = 12; chatbotRender(); } },
+                            { label: 'Seconda casa', action: () => { chatbotState.scelte.uso = 'Seconda casa'; chatbotState.step = 12; chatbotRender(); } },
+                            { label: 'Investimento/affitto', action: () => { chatbotState.scelte.uso = 'Investimento/affitto'; chatbotState.step = 12; chatbotRender(); } }
                         ], true);
                         break;
-                    case 3:
-                        chatbotAddMsg("Quale massimale assicurato preferisce?", 'bot');
-                        chatbotSetOptions([
-                            { label: 'Fino a € 100.000', action: () => { chatbotState.scelte.massimale = 'Fino a € 100.000'; chatbotState.step = 4; chatbotRender(); } },
-                            { label: '€ 100.000 — € 300.000', action: () => { chatbotState.scelte.massimale = '€ 100.000 — € 300.000'; chatbotState.step = 4; chatbotRender(); } },
-                            { label: 'Oltre € 300.000', action: () => { chatbotState.scelte.massimale = 'Oltre € 300.000'; chatbotState.step = 4; chatbotRender(); } }
-                        ], true);
-                        break;
-                    case 4:
+                    case 12:
                         const calc = calcolaPremio();
                         const riepilogo = `
-                            <strong>Riepilogo della Sua richiesta</strong><br><br>
-                            • Tipologia: ${chatbotState.scelte.tipoImmobile}<br>
-                            • Copertura: ${chatbotState.scelte.copertura}<br>
-                            • Massimale: ${chatbotState.scelte.massimale}<br>
+                            <strong>Riepilogo tecnico di sottoscrizione</strong><br><br>
+                            • Linea prodotto: ${chatbotState.scelte.linea}<br>
+                            • Uso dichiarato: ${chatbotState.scelte.uso}<br>
                             • Valore immobile: € ${calc.valoreImmobile.toLocaleString('it-IT')}<br>
-                            • Indice IVE: ${calc.ivePercentuale}%<br><br>
-                            <strong>Premio annuo stimato: € ${calc.premio.toLocaleString('it-IT')}</strong><br>
-                            <span style="font-size: 11px; color: #666;">Stima indicativa, soggetta a valutazione tecnica.</span>
+                            • Indice IVE: ${calc.ivePercentuale}%<br>
+                            • Tasso applicato: ${calc.tasso}‰<br>
+                            • Premio base: € ${calc.premioBase.toLocaleString('it-IT')}<br>
+                            • Caricamento per rischio: € ${calc.caricamentoRischio.toLocaleString('it-IT')}<br><br>
+                            <strong>Premio tecnico annuo: € ${calc.premioTecnico.toLocaleString('it-IT')}</strong><br>
+                            <span style="font-size: 11px; color: #666;">Valore indicativo da sottoporre a validazione attuariale.</span>
                         `;
                         chatbotAddMsg(riepilogo, 'bot');
                         chatbotSetOptions([
-                            { label: 'Procedi con la sottoscrizione', action: () => { chatbotState.step = 5; chatbotRender(); } },
-                            { label: 'Parla con un consulente umano', action: () => { chatbotState.step = 6; chatbotRender(); } },
-                            { label: 'Ricomincia', action: () => { chatbotReset(); } }
+                            { label: 'Esporta proposta', action: () => { chatbotState.step = 13; chatbotRender(); } },
+                            { label: 'Sottoponi a revisione tecnica', action: () => { chatbotState.step = 14; chatbotRender(); } },
+                            { label: 'Modifica parametri', action: () => {
+                                chatbotState.history.pop();
+                                chatbotState.history.pop();
+                                chatbotState.step = 10;
+                                const msgs = document.getElementById('chatbotMessages');
+                                msgs.removeChild(msgs.lastChild);
+                                msgs.removeChild(msgs.lastChild);
+                                chatbotRender();
+                            }}
                         ], true);
                         break;
-                    case 5:
-                        chatbotAddMsg("Perfetto. La Sua richiesta è stata registrata. Un consulente Deloitte La contatterà entro 24 ore per finalizzare la sottoscrizione e l'invio della documentazione contrattuale.<br><br>Grazie per averci scelto.", 'bot');
+                    case 13:
+                        chatbotAddMsg(`Proposta esportata in formato PDF.<br>File: <em>proposta_${generaNumeroPratica()}.pdf</em><br><br>Documento disponibile nella sezione "Proposte in lavorazione" del gestionale.`, 'bot');
                         chatbotSetOptions([
-                            { label: 'Nuova richiesta', action: () => { chatbotReset(); } }
+                            { label: 'Nuova operazione', action: () => { chatbotReset(); } }
                         ], false);
                         break;
-                    case 6:
-                        chatbotAddMsg("Certo. Un consulente Deloitte specializzato in polizze Property La ricontatterà al più presto. Ci confermi il modo preferito di contatto:", 'bot');
+                    case 14:
+                        chatbotAddMsg(`Pratica inoltrata al team tecnico per revisione.<br>Riferimento: <strong>${generaNumeroPratica()}</strong><br><br>Riceverà notifica nel cruscotto al completamento della validazione attuariale.`, 'bot');
                         chatbotSetOptions([
-                            { label: 'Telefono', action: () => { chatbotState.step = 7; chatbotRender(); } },
-                            { label: 'Email', action: () => { chatbotState.step = 7; chatbotRender(); } },
-                            { label: 'Videocall', action: () => { chatbotState.step = 7; chatbotRender(); } }
+                            { label: 'Nuova operazione', action: () => { chatbotReset(); } }
+                        ], false);
+                        break;
+
+                    // ===== RAMO VERIFICA ACCETTABILITÀ =====
+                    case 20:
+                        const checks = verificaAccettabilita();
+                        const icone = { 'ok': '✓', 'warn': '⚠', 'critical': '✗' };
+                        const colori = { 'ok': '#86BC25', 'warn': '#FF9800', 'critical': '#D32F2F' };
+                        let checklistHtml = '<strong>Checklist di accettabilità</strong><br><br>';
+                        checks.forEach(c => {
+                            checklistHtml += `<div style="margin-bottom: 8px;"><span style="color: ${colori[c.stato]}; font-weight: 700;">${icone[c.stato]}</span> ${c.testo}</div>`;
+                        });
+                        const hasCritical = checks.some(c => c.stato === 'critical');
+                        const hasWarn = checks.some(c => c.stato === 'warn');
+                        if (hasCritical) {
+                            checklistHtml += '<br><span style="color: #D32F2F; font-weight: 600;">Esito: rischio non accettabile in via ordinaria.</span>';
+                        } else if (hasWarn) {
+                            checklistHtml += '<br><span style="color: #FF9800; font-weight: 600;">Esito: rischio accettabile con condizioni particolari.</span>';
+                        } else {
+                            checklistHtml += '<br><span style="color: #86BC25; font-weight: 600;">Esito: rischio pienamente accettabile.</span>';
+                        }
+                        chatbotAddMsg(checklistHtml, 'bot');
+                        chatbotSetOptions([
+                            { label: 'Procedi con quotazione', action: () => { chatbotState.step = 10; chatbotRender(); } },
+                            { label: 'Apri pratica di referral', action: () => { chatbotState.step = 21; chatbotRender(); } },
+                            { label: 'Torna al menu principale', action: () => { chatbotReset(); } }
                         ], true);
                         break;
-                    case 7:
-                        chatbotAddMsg("Richiesta inviata. Un consulente La contatterà entro 24 ore lavorative.<br><br>Grazie per averci scelto.", 'bot');
+                    case 21:
+                        chatbotAddMsg(`Pratica di referral aperta verso il sottoscrittore senior.<br>Riferimento: <strong>${generaNumeroPratica()}</strong><br><br>Il caso è stato preso in carico. Riceverà aggiornamenti nel cruscotto.`, 'bot');
                         chatbotSetOptions([
-                            { label: 'Nuova richiesta', action: () => { chatbotReset(); } }
+                            { label: 'Nuova operazione', action: () => { chatbotReset(); } }
+                        ], false);
+                        break;
+
+                    // ===== RAMO GENERA PROPOSTA =====
+                    case 30:
+                        chatbotAddMsg("La proposta sarà generata in base al profilo di rischio dell'immobile e ai parametri di copertura standard. Conferma di voler procedere?", 'bot');
+                        chatbotSetOptions([
+                            { label: 'Genera PDF proposta', action: () => { chatbotState.step = 31; chatbotRender(); } },
+                            { label: 'Apri pratica nel gestionale', action: () => { chatbotState.step = 32; chatbotRender(); } },
+                            { label: 'Torna al menu principale', action: () => { chatbotReset(); } }
+                        ], true);
+                        break;
+                    case 31:
+                        chatbotAddMsg(`PDF proposta generato.<br>File: <em>proposta_${generaNumeroPratica()}.pdf</em><br><br>Documento pronto per invio al contraente o salvataggio nella pratica.`, 'bot');
+                        chatbotSetOptions([
+                            { label: 'Nuova operazione', action: () => { chatbotReset(); } }
+                        ], false);
+                        break;
+                    case 32:
+                        const pratica = generaNumeroPratica();
+                        chatbotAddMsg(`Pratica <strong>${pratica}</strong> aperta nel gestionale PropertySys.<br><br>Stato iniziale: <em>in lavorazione</em><br>Riceverà notifica nel cruscotto a ogni avanzamento.`, 'bot');
+                        chatbotSetOptions([
+                            { label: 'Nuova operazione', action: () => { chatbotReset(); } }
                         ], false);
                         break;
                 }
@@ -2403,7 +2506,7 @@
             function chatbotReset() {
                 chatbotState.step = 0;
                 chatbotState.history = [];
-                chatbotState.scelte = { obiettivo: null, tipoImmobile: null, copertura: null, massimale: null };
+                chatbotState.scelte = { linea: null, uso: null };
                 document.getElementById('chatbotMessages').innerHTML = '';
                 chatbotRender();
             }
