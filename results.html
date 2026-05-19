@@ -768,22 +768,25 @@
 
                     <!-- TAB: Compravendite -->
                     <div id="tab-compravendite" class="tab-content">
-                        <div class="section-title">Ripartizione Compravendite</div>
-                        <div class="data-grid">
-                            <div class="data-card">
-                                <div class="data-card-label">Compravendite Residenziali 2025</div>
-                                <div class="data-card-value" id="compravenditeResidenziali">-</div>
-                            </div>
-                            <div class="data-card">
-                                <div class="data-card-label">Compravendite Non Residenziali 2025</div>
-                                <div class="data-card-value" id="compravenditeNonResidenziali">-</div>
-                            </div>
-                            <div class="data-card">
-                                <div class="data-card-label">Compravendite Posti Auto 2025</div>
-                                <div class="data-card-value" id="compravenditePostiAuto">-</div>
-                            </div>
-                        </div>
-                    </div>
+    <div class="section-title">Ripartizione Compravendite</div>
+    <div style="background-color: #f0f7fb; border-left: 3px solid #007CB0; padding: 12px 16px; border-radius: 4px; margin-bottom: 20px; font-size: 13px; color: #333;">
+        <strong>Dati riferiti a:</strong> <span id="zonaCompravendite">-</span> <span style="color: #666;">(<span id="posizioneZonaCompravendite">-</span>)</span>
+    </div>
+    <div class="data-grid">
+        <div class="data-card">
+            <div class="data-card-label">Compravendite Residenziali 2025</div>
+            <div class="data-card-value" id="compravenditeResidenziali">-</div>
+        </div>
+        <div class="data-card">
+            <div class="data-card-label">Compravendite Non Residenziali 2025</div>
+            <div class="data-card-value" id="compravenditeNonResidenziali">-</div>
+        </div>
+        <div class="data-card">
+            <div class="data-card-label">Compravendite Posti Auto 2025</div>
+            <div class="data-card-value" id="compravenditePostiAuto">-</div>
+        </div>
+    </div>
+</div>
                 </div>
 
                 <!-- SEZIONE 4: VALUTAZIONE IMMOBILE -->
@@ -1504,6 +1507,8 @@
                     document.getElementById('compravenditeResidenziali').textContent = mercato.compravendite_residenziali_2024;
                     document.getElementById('compravenditeNonResidenziali').textContent = mercato.compravendite_non_residenziali_2024;
                     document.getElementById('compravenditePostiAuto').textContent = mercato.compravendite_posti_auto_2024;
+                    document.getElementById('zonaCompravendite').textContent = mercato.zona_nome;
+                    document.getElementById('posizioneZonaCompravendite').textContent = mercato.posizione_zona;
 
                     createCharts(mercato);
                 }
