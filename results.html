@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Risultati Valutazione - Deloitte</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         * {
             margin: 0;
@@ -846,6 +848,14 @@
                                 <span>10 km</span>
                             </div>
                         </div>
+
+</div>
+                        <div style="margin-bottom: 25px;">
+                            <div style="font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Area di copertura</div>
+                            <div id="mappaRaggio" style="width: 100%; height: 350px; border-radius: 6px; border: 1px solid #e0e0e0; overflow: hidden;"></div>
+                        </div>
+                        <div class="data-grid">
+                        
                         <div class="data-grid">
                             <div class="data-card">
                                 <div class="data-card-label">Zona Immobiliare</div>
@@ -1154,15 +1164,6 @@
                         <div class="info-box" style="background-color: #fff3cd; border-left-color: #FBC02D;" id="iveSintesi">-</div>
                     </div>
 
-                    <div style="margin-bottom: 30px;">
-                        <button id="toggleCalcoloBtn" style="width: 100%; padding: 14px 20px; background-color: #f9f9f9; border: 1.5px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; color: #007CB0; text-transform: uppercase; letter-spacing: 0.5px; text-align: left; display: flex; justify-content: space-between; align-items: center; font-family: inherit;">
-                            <span>🔍 Mostra calcolo dettagliato</span>
-                            <span id="toggleCalcoloArrow" style="font-size: 12px;">▼</span>
-                        </button>
-                        <div id="dettaglioCalcoloIVE" style="display: none; margin-top: 15px; background-color: #fafafa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 25px; font-size: 13px; line-height: 1.7;">
-                            <div id="dettaglioCalcoloContent"></div>
-                        </div>
-                    </div>
                     
                 </div>
 
@@ -2072,7 +2073,66 @@
                     incCompravendite: 0.60
                 }
             };
+// ====== MAPPA LEAFLET CON CERCHIO RAGGIO ======
+            // Coordinate per ogni immobile (in produzione verrebbero dalla geocodifica dell'indirizzo)
+            const coordinateImmobile = {
+                1: { lat: 42.7925, lng: 13.0964, nome: 'Via Circonvallazione 44, Norcia (PG)' },
+                2: { lat: 45.4642, lng: 9.1900,  nome: 'Via Milano 15, Milano' },
+                3: { lat: 45.0703, lng: 7.6869,  nome: 'Via Torino 88, Torino' }
+            };
 
+            let mappaLeaflet = null;
+            let cerchioRaggio = null;
+            let markerImmobile = null;
+
+            function inizializzaMappaRaggio() {
+                const id = getImmobileId();
+                const coord = coordinateImmobile[id] || coordinateImmobile[1];
+
+                // Se la mappa è già stata creata, non la ricreiamo
+                if (mappaLeaflet) return;
+
+                mappaLeaflet = L.map('mappaRaggio', {
+                    zoomControl: true,
+                    scrollWheelZoom: false
+                }).setView([coord.lat, coord.lng], 13);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 18
+                }).addTo(mappaLeaflet);
+
+                // Marker dell'immobile
+                const iconaImmobile = L.divIcon({
+                    html: '<div style="background:#86BC25; width:20px; height:20px; border-radius:50%; border:3px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>',
+                    className: '',
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                });
+                markerImmobile = L.marker([coord.lat, coord.lng], { icon: iconaImmobile })
+                    .addTo(mappaLeaflet)
+                    .bindPopup('<strong>' + coord.nome + '</strong>');
+
+                // Cerchio iniziale (default 2 km)
+                cerchioRaggio = L.circle([coord.lat, coord.lng], {
+                    color: '#007CB0',
+                    fillColor: '#007CB0',
+                    fillOpacity: 0.15,
+                    weight: 2,
+                    radius: 2000
+                }).addTo(mappaLeaflet);
+
+                // Adatta lo zoom al cerchio
+                mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20, 20] });
+            }
+
+            function aggiornaCerchioRaggio(raggioKm) {
+                if (!cerchioRaggio || !mappaLeaflet) return;
+                const raggioMetri = raggioKm * 1000;
+                cerchioRaggio.setRadius(raggioMetri);
+                // Adatta lo zoom per mantenere il cerchio visibile
+                mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20, 20] });
+            }
             function ricalcolaQuotazioni(raggioKm) {
                 const id = getImmobileId();
                 const b = quotazioniBase[id] || quotazioniBase[1];
@@ -2118,6 +2178,10 @@
             }
 
             // Listener slider
+// Inizializza la mappa Leaflet
+            inizializzaMappaRaggio();
+
+            // Listener slider
             const raggioSlider = document.getElementById('raggioSlider');
             const raggioValore = document.getElementById('raggioValore');
             if (raggioSlider) {
@@ -2125,9 +2189,11 @@
                     const val = parseFloat(e.target.value);
                     raggioValore.textContent = val.toString().replace('.', ',');
                     ricalcolaQuotazioni(val);
+                    aggiornaCerchioRaggio(val);
                 });
                 // Inizializza con valore di default
                 ricalcolaQuotazioni(parseFloat(raggioSlider.value));
+                aggiornaCerchioRaggio(parseFloat(raggioSlider.value));
             }
                 
                 // Carica dati mercato
@@ -2169,7 +2235,7 @@
 
 // Carica dati IVE
                 loadIVEData();
-                popolaDettaglioCalcolo();
+             
 
                 // Carica radar coperture e widget meteo
                 createCopertureRadar();
@@ -2187,117 +2253,7 @@
                 }
             }
 
-// Popola il box "Mostra calcolo dettagliato"
-            function popolaDettaglioCalcolo() {
-                const immobileId = getImmobileId();
-                const ive = iveData.find(i => i.immobile_id === immobileId);
-                if (!ive) return;
-                const c = ive.calcolo_dettaglio;
-                const inp = ive.input_originali;
-                const V = c.valore_immobile;
-                const fmtE = (v) => '€ ' + Math.round(v).toLocaleString('it-IT');
-                const fmtPerc = (v) => (v * 100).toFixed(2) + '%';
-                const fmtProb = (v) => v === 0 ? '0' : '1/' + Math.round(1/v) + ' anni';
 
-                const html = `
-                    <div style="margin-bottom: 25px; padding-bottom: 18px; border-bottom: 2px solid #e0e0e0;">
-                        <div style="font-size: 13px; font-weight: 700; color: #003d66; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">Dati di input</div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
-                            <div><strong>Valore immobile:</strong> ${fmtE(V)}</div>
-                            <div><strong>Pendenza terreno:</strong> ${inp.pendenza_percentuale}%</div>
-                            <div><strong>PGA (TR 475 anni):</strong> ${inp.pga_475}g — Zona sismica ${inp.zona_sismica}</div>
-                            <div><strong>Classe PAI frane:</strong> ${inp.classe_pai_frane}</div>
-                            <div><strong>Classe PAI alluvioni:</strong> ${inp.classe_pai_alluvioni}</div>
-                            <div><strong>Epoca costruzione:</strong> ${inp.epoca_costruzione}</div>
-                            <div><strong>Tipologia strutturale:</strong> ${inp.tipologia_strutturale}</div>
-                            <div><strong>Classe energetica:</strong> ${inp.classe_energetica}</div>
-                        </div>
-                        <div style="margin-top: 10px; font-size: 11px; color: #888;">Fonti: INGV MPS04 (pericolosità sismica), ISPRA-PAI (frane e alluvioni), epoca costruzione da visura catastale</div>
-                    </div>
-
-                    <div style="margin-bottom: 25px; padding-bottom: 18px; border-bottom: 2px solid #e0e0e0;">
-                        <div style="font-size: 13px; font-weight: 700; color: #D32F2F; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">⚠ Rischio Sismico</div>
-                        <div style="background: white; padding: 14px; border-radius: 6px; border-left: 3px solid #D32F2F;">
-                            <div style="font-family: 'Courier New', monospace; font-size: 12px; color: #333; margin-bottom: 10px;">
-                                EAL<sub>sismico</sub> = V × P<sub>annua</sub> × DR<sub>sismico</sub> × f<sub>ampl</sub>
-                            </div>
-                            <ul style="list-style: none; padding-left: 0; margin: 10px 0;">
-                                <li style="padding: 3px 0;">• <strong>V</strong> = ${fmtE(V)} <span style="color: #888;">(valore immobile)</span></li>
-                                <li style="padding: 3px 0;">• <strong>P<sub>annua</sub></strong> = 1/475 = ${fmtPerc(c.rischio_sismico.prob_annua)} <span style="color: #888;">(probabilità annua superamento PGA<sub>475</sub>)</span></li>
-                                <li style="padding: 3px 0;">• <strong>Vulnerabilità strutturale</strong> = ${c.rischio_sismico.vuln_strutturale.toFixed(2)} <span style="color: #888;">(epoca ${inp.epoca_costruzione}, ${inp.tipologia_strutturale})</span></li>
-                                <li style="padding: 3px 0;">• <strong>PGA normalizzato</strong> = ${inp.pga_475}/0.35 = ${(inp.pga_475/0.35).toFixed(2)}</li>
-                                <li style="padding: 3px 0;">• <strong>DR<sub>sismico</sub></strong> = ${c.rischio_sismico.vuln_strutturale.toFixed(2)} × ${(inp.pga_475/0.35).toFixed(2)} = ${c.rischio_sismico.damage_ratio.toFixed(3)}</li>
-                                <li style="padding: 3px 0;">• <strong>f<sub>ampl</sub></strong> = ${c.rischio_sismico.fattore_amplificazione} <span style="color: #888;">(integra eventi con TR 50-475 anni)</span></li>
-                            </ul>
-                            <div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin-top: 10px; font-family: 'Courier New', monospace; font-size: 13px;">
-                                EAL<sub>sismico</sub> = ${fmtE(V)} × ${c.rischio_sismico.prob_annua.toFixed(5)} × ${c.rischio_sismico.damage_ratio.toFixed(3)} × ${c.rischio_sismico.fattore_amplificazione}<br>
-                                <strong style="color: #D32F2F;">= ${fmtE(c.rischio_sismico.eal_annuo)} / anno</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 25px; padding-bottom: 18px; border-bottom: 2px solid #e0e0e0;">
-                        <div style="font-size: 13px; font-weight: 700; color: #FF9800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">🏔 Rischio Frane</div>
-                        <div style="background: white; padding: 14px; border-radius: 6px; border-left: 3px solid #FF9800;">
-                            <div style="font-family: 'Courier New', monospace; font-size: 12px; color: #333; margin-bottom: 10px;">
-                                EAL<sub>frane</sub> = V × P<sub>PAI</sub> × DR<sub>frane</sub> × C<sub>pendenza</sub>
-                            </div>
-                            <ul style="list-style: none; padding-left: 0; margin: 10px 0;">
-                                <li style="padding: 3px 0;">• <strong>Classe PAI</strong> = ${inp.classe_pai_frane} → P<sub>annua</sub> = ${fmtProb(c.rischio_frane.prob_annua)}</li>
-                                <li style="padding: 3px 0;">• <strong>DR<sub>frane</sub></strong> = ${c.rischio_frane.damage_ratio} <span style="color: #888;">(Damage Ratio classe ${inp.classe_pai_frane})</span></li>
-                                <li style="padding: 3px 0;">• <strong>C<sub>pendenza</sub></strong> = ${c.rischio_frane.corr_pendenza.toFixed(2)}x <span style="color: #888;">(correzione acclività ${inp.pendenza_percentuale}%)</span></li>
-                            </ul>
-                            <div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin-top: 10px; font-family: 'Courier New', monospace; font-size: 13px;">
-                                EAL<sub>frane</sub> = ${fmtE(V)} × ${c.rischio_frane.prob_annua.toFixed(5)} × ${c.rischio_frane.damage_ratio} × ${c.rischio_frane.corr_pendenza.toFixed(2)}<br>
-                                <strong style="color: #FF9800;">= ${fmtE(c.rischio_frane.eal_annuo)} / anno</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 25px; padding-bottom: 18px; border-bottom: 2px solid #e0e0e0;">
-                        <div style="font-size: 13px; font-weight: 700; color: #007CB0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">🌊 Rischio Alluvioni</div>
-                        <div style="background: white; padding: 14px; border-radius: 6px; border-left: 3px solid #007CB0;">
-                            <div style="font-family: 'Courier New', monospace; font-size: 12px; color: #333; margin-bottom: 10px;">
-                                EAL<sub>alluvioni</sub> = V × P<sub>PAI</sub> × DR<sub>alluvioni</sub>
-                            </div>
-                            <ul style="list-style: none; padding-left: 0; margin: 10px 0;">
-                                <li style="padding: 3px 0;">• <strong>Classe PAI</strong> = ${inp.classe_pai_alluvioni} → P<sub>annua</sub> = ${fmtProb(c.rischio_alluvioni.prob_annua)}</li>
-                                <li style="padding: 3px 0;">• <strong>DR<sub>alluvioni</sub></strong> = ${c.rischio_alluvioni.damage_ratio} <span style="color: #888;">(Damage Ratio classe ${inp.classe_pai_alluvioni})</span></li>
-                            </ul>
-                            <div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin-top: 10px; font-family: 'Courier New', monospace; font-size: 13px;">
-                                EAL<sub>alluvioni</sub> = ${fmtE(V)} × ${c.rischio_alluvioni.prob_annua.toFixed(5)} × ${c.rischio_alluvioni.damage_ratio}<br>
-                                <strong style="color: #007CB0;">= ${fmtE(c.rischio_alluvioni.eal_annuo)} / anno</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 25px;">
-                        <div style="font-size: 13px; font-weight: 700; color: #003d66; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">📊 Aggregazione e IVE</div>
-                        <div style="background: linear-gradient(135deg, #003d66 0%, #007CB0 100%); color: white; padding: 18px; border-radius: 6px;">
-                            <div style="margin-bottom: 12px; font-size: 13px; opacity: 0.95;">
-                                EAL totale annuo = EAL<sub>sismico</sub> + EAL<sub>frane</sub> + EAL<sub>alluvioni</sub>
-                            </div>
-                            <div style="font-family: 'Courier New', monospace; font-size: 13px; margin-bottom: 12px;">
-                                = ${fmtE(c.rischio_sismico.eal_annuo)} + ${fmtE(c.rischio_frane.eal_annuo)} + ${fmtE(c.rischio_alluvioni.eal_annuo)}<br>
-                                = <strong style="font-size: 16px;">${fmtE(c.eal_annuo)} / anno</strong>
-                            </div>
-                            <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 12px; margin-top: 12px;">
-                                Perdita attesa su 50 anni = EAL × 50<br>
-                                <span style="font-family: 'Courier New', monospace;">= ${fmtE(c.eal_annuo)} × 50 = <strong style="font-size: 18px;">${fmtE(c.ive_totale)}</strong></span>
-                            </div>
-                            <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 12px; margin-top: 12px;">
-                                <strong>IVE = ${fmtE(c.ive_totale)} / ${fmtE(V)} × 100 = ${c.ive_percentuale}%</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 20px; padding: 12px 16px; background-color: #fff3cd; border-left: 3px solid #FBC02D; border-radius: 4px; font-size: 11px; color: #856404;">
-                        <strong>Note metodologiche:</strong> Modello semplificato basato su curve di fragilità adattate al patrimonio italiano. I parametri di vulnerabilità strutturale sono coefficienti di letteratura (HAZUS-MH adattato). Per applicazioni in produzione si raccomanda l'integrazione con motori catastrofali certificati (RMS/AIR Worldwide) o implementazioni complete HAZUS.
-                    </div>
-                `;
-
-                document.getElementById('dettaglioCalcoloContent').innerHTML = html;
-            }
 
             // Toggle del box dettaglio
             document.addEventListener('DOMContentLoaded', () => {
