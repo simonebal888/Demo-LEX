@@ -3,21 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ricerca Immobile - Deloitte</title>
+    <title>Ricerca Soggetto - Deloitte</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f5f5;
+            color: #333333;
             min-height: 100vh;
             padding: 20px;
         }
-
         .header {
             background: linear-gradient(135deg, #86BC25 0%, #007CB0 100%);
             color: white;
@@ -26,114 +21,58 @@
             margin-bottom: 40px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-
-        .header-content {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .header-logo {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-
-        .header-logo span {
-            color: #ffffff;
-        }
-
-        .header-title {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .header-subtitle {
-            font-size: 14px;
-            opacity: 0.95;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
+        .header-content { max-width: 900px; margin: 0 auto; }
+        .header-title { font-size: 28px; font-weight: 600; margin-bottom: 8px; }
+        .header-subtitle { font-size: 14px; opacity: 0.95; }
+        .container { max-width: 900px; margin: 0 auto; }
         .form-card {
             background: white;
             border-radius: 8px;
             padding: 40px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
         }
-
-        .form-title {
-            font-size: 20px;
+        .section-title {
+            font-size: 18px;
             font-weight: 600;
             color: #000000;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #86BC25;
         }
-
-        .form-title::before {
-            content: "";
-            width: 4px;
-            height: 24px;
-            background-color: #86BC25;
-            margin-right: 12px;
-            border-radius: 2px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .form-grid.full {
-            grid-template-columns: 1fr;
-        }
-
         .form-group {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .form-field {
+            flex: 1;
+            min-width: 250px;
             display: flex;
             flex-direction: column;
         }
-
-        label {
-            font-size: 13px;
+        .form-label {
+            font-size: 12px;
             font-weight: 600;
-            color: #333333;
-            margin-bottom: 8px;
+            color: #666666;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-bottom: 8px;
         }
-
-        input[type="text"],
-        input[type="number"] {
-            padding: 12px 15px;
-            border: 1px solid #d0d0d0;
+        .form-input {
+            padding: 12px 16px;
+            border: 1.5px solid #e0e0e0;
             border-radius: 4px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            background-color: #f9f9f9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 15px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            text-transform: uppercase;
         }
-
-        input[type="text"]:focus,
-        input[type="number"]:focus {
+        .form-input:focus {
             outline: none;
-            border-color: #86BC25;
-            background-color: white;
-            box-shadow: 0 0 0 3px rgba(134, 188, 37, 0.1);
+            border-color: #007CB0;
         }
-
-        .button-group {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-
         .btn {
             padding: 12px 28px;
             border: none;
@@ -144,298 +83,320 @@
             letter-spacing: 0.5px;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: inherit;
         }
-
         .btn-primary {
             background: linear-gradient(135deg, #86BC25 0%, #007CB0 100%);
             color: white;
         }
-
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(134, 188, 37, 0.3);
         }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        .btn-secondary {
-            background-color: #e8e8e8;
-            color: #333333;
-        }
-
-        .btn-secondary:hover {
-            background-color: #d8d8d8;
-        }
-
-        .loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .loading-overlay.show {
-            display: flex;
-        }
-
-        .loading-content {
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e0e0e0;
-            border-top: 4px solid #86BC25;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333333;
-            margin-bottom: 8px;
-        }
-
-        .loading-subtext {
+        .breadcrumb {
+            max-width: 900px;
+            margin: 0 auto 40px;
             font-size: 13px;
             color: #666666;
         }
-
-        .info-box {
-            background-color: #f0f7ff;
-            border-left: 4px solid #007CB0;
-            padding: 16px;
-            border-radius: 4px;
-            margin-bottom: 30px;
-            font-size: 13px;
-            color: #333333;
-            line-height: 1.6;
-        }
-
-        .info-box strong {
+        .breadcrumb a {
             color: #007CB0;
+            text-decoration: none;
+        }
+        .breadcrumb a:hover { text-decoration: underline; }
+
+        .error-msg {
+            background-color: #f8d7da;
+            border-left: 4px solid #D32F2F;
+            padding: 14px 18px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #721c24;
+            display: none;
+        }
+        .error-msg.show { display: block; }
+
+        /* Risultati soggetto */
+        .soggetto-info {
+            background-color: #f0f7fb;
+            border-left: 4px solid #007CB0;
+            padding: 18px 22px;
+            border-radius: 4px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+        .soggetto-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .soggetto-nome {
+            font-size: 18px;
+            font-weight: 700;
+            color: #000;
+        }
+        .soggetto-dettagli {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
         }
 
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header-title {
-                font-size: 22px;
-            }
-
-            .form-card {
-                padding: 25px;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
+        .proprieta-titolo {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+        .proprieta-card {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 18px 20px;
+            background-color: #ffffff;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .proprieta-card:hover {
+            border-color: #86BC25;
+            box-shadow: 0 4px 12px rgba(134, 188, 37, 0.15);
+            transform: translateY(-1px);
+        }
+        .proprieta-card.censita {
+            border-left: 4px solid #86BC25;
+        }
+        .proprieta-card.non-censita {
+            border-left: 4px solid #BDBDBD;
+            opacity: 0.85;
+        }
+        .proprieta-icon {
+            font-size: 32px;
+            line-height: 1;
+        }
+        .proprieta-info { flex: 1; }
+        .proprieta-indirizzo {
+            font-size: 15px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 4px;
+        }
+        .proprieta-dati {
+            font-size: 12px;
+            color: #666;
+        }
+        .proprieta-badge {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 5px 10px;
+            border-radius: 12px;
+        }
+        .proprieta-badge.censita {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .proprieta-badge.non-censita {
+            background-color: #f5f5f5;
+            color: #757575;
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-content">
-            <div class="header-title">Valutazione Immobili</div>
-            <div class="header-subtitle">Ricerca e analisi della copertura assicurativa</div>
+            <div class="header-title">Ricerca Soggetto</div>
+            <div class="header-subtitle">Inserire il codice fiscale per visualizzare il patrimonio immobiliare</div>
         </div>
+    </div>
+
+    <div class="breadcrumb">
+        <a href="index.html">← Torna al login</a> | Ricerca
     </div>
 
     <div class="container">
         <div class="form-card">
-            <div class="form-title">Inserisci i dati dell'immobile</div>
+            <div class="section-title">Identificazione Soggetto</div>
+            <div class="form-group">
+                <div class="form-field">
+                    <label class="form-label" for="codiceFiscale">Codice Fiscale</label>
+                    <input type="text" id="codiceFiscale" class="form-input" maxlength="16" placeholder="RSSMRA78C15H501Z">
+                </div>
+                <button class="btn btn-primary" id="cercaBtn">Cerca</button>
+            </div>
+            <div class="error-msg" id="errorMsg">Codice fiscale non trovato. Riprovare.</div>
 
-            <form id="searchForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="via">Via / Strada</label>
-                        <input 
-                            type="text" 
-                            id="via" 
-                            name="via" 
-                            placeholder="Es: Via Roma" 
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label for="civico">Numero Civico</label>
-                        <input 
-                            type="text" 
-                            id="civico" 
-                            name="civico" 
-                            placeholder="Es: 42" 
-                        >
-                    </div>
+            <div id="risultatiContainer" style="display: none;">
+                <div class="soggetto-info">
+                    <div class="soggetto-label">Soggetto individuato</div>
+                    <div class="soggetto-nome" id="soggettoNome">-</div>
+                    <div class="soggetto-dettagli" id="soggettoDettagli">-</div>
                 </div>
 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="cap">CAP</label>
-                        <input 
-                            type="text" 
-                            id="cap" 
-                            name="cap" 
-                            placeholder="Es: 20100" 
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label for="citta">Città</label>
-                        <input 
-                            type="text" 
-                            id="citta" 
-                            name="citta" 
-                            placeholder="Es: Milano" 
-                        >
-                    </div>
-                </div>
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="scala">Scala</label>
-                        <input 
-                            type="text" 
-                            id="scala" 
-                            name="scala" 
-                            placeholder="Es: A" 
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label for="piano">Piano</label>
-                        <input 
-                            type="text" 
-                            id="piano" 
-                            name="piano" 
-                            placeholder="Es: 3" 
-                        >
-                    </div>
-                </div>
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="numero-appartamento">Numero Appartamento</label>
-                        <input 
-                            type="text" 
-                            id="numero-appartamento" 
-                            name="numeroAppartamento" 
-                            placeholder="Es: 5" 
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label for="interno">Interno</label>
-                        <input 
-                            type="text" 
-                            id="interno" 
-                            name="interno" 
-                            placeholder="Es: 1" 
-                        >
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary">Cerca Immobile</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-content">
-            <div class="spinner"></div>
-            <div class="loading-text">Ricerca in corso...</div>
-            <div class="loading-subtext">Stiamo recuperando i dati dell'immobile</div>
+                <div class="proprieta-titolo">Patrimonio immobiliare (<span id="numProprieta">0</span>)</div>
+                <div id="listaProprieta"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        const searchForm = document.getElementById('searchForm');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Recupera i dati del form
-            const via = document.getElementById('via').value;
-            const civico = document.getElementById('civico').value;
-            const cap = document.getElementById('cap').value;
-            const citta = document.getElementById('citta').value;
-            const scala = document.getElementById('scala').value;
-            const piano = document.getElementById('piano').value;
-            const numeroAppartamento = document.getElementById('numero-appartamento').value;
-            const interno = document.getElementById('interno').value;
-
-            // Mappa la via a immobile_id
-            let immobileId = 1; // default
-            if (via.toLowerCase().includes('milano')) {
-                immobileId = 2;
-            } else if (via.toLowerCase().includes('torino')) {
-                immobileId = 3;
+        // Base dati soggetti e proprietà associate
+        const soggetti = {
+            'RSSMRA78C15H501Z': {
+                nome: 'ROSSI Mario',
+                nato: 'Norcia (PG)',
+                dataNascita: '15/03/1978',
+                proprieta: [
+                    {
+                        immobile_id: 1,
+                        censita: true,
+                        via: 'Via Circonvallazione',
+                        civico: '44',
+                        cap: '06046',
+                        citta: 'Norcia',
+                        provincia: 'PG',
+                        scala: 'A',
+                        piano: '3',
+                        numeroAppartamento: '5',
+                        interno: '1',
+                        tipologia: 'Appartamento',
+                        superficie: '100 m²',
+                        categoria: 'A/2'
+                    },
+                    {
+                        immobile_id: 99,
+                        censita: false,
+                        via: 'Via dei Fori Imperiali',
+                        civico: '12',
+                        cap: '00184',
+                        citta: 'Roma',
+                        provincia: 'RM',
+                        scala: 'B',
+                        piano: '2',
+                        numeroAppartamento: '4',
+                        interno: '3',
+                        tipologia: 'Appartamento',
+                        superficie: '85 m²',
+                        categoria: 'A/3'
+                    },
+                    {
+                        immobile_id: 98,
+                        censita: false,
+                        via: 'Via Garibaldi',
+                        civico: '7',
+                        cap: '06121',
+                        citta: 'Perugia',
+                        provincia: 'PG',
+                        scala: '-',
+                        piano: 'Terra',
+                        numeroAppartamento: '-',
+                        interno: '-',
+                        tipologia: 'Box auto',
+                        superficie: '18 m²',
+                        categoria: 'C/6'
+                    },
+                    {
+                        immobile_id: 97,
+                        censita: false,
+                        via: 'Strada Provinciale 477',
+                        civico: 'snc',
+                        cap: '06046',
+                        citta: 'Castelluccio di Norcia',
+                        provincia: 'PG',
+                        scala: '-',
+                        piano: 'Terra',
+                        numeroAppartamento: '-',
+                        interno: '-',
+                        tipologia: 'Terreno agricolo',
+                        superficie: '4.500 m²',
+                        categoria: 'Seminativo'
+                    }
+                ]
             }
-            // Via Circonvallazione rimane immobile_id: 1
+        };
 
-            // Salva i dati in sessionStorage
-            sessionStorage.setItem('immobileData', JSON.stringify({
-                immobile_id: immobileId,
-                via: via,
-                civico: civico,
-                cap: cap,
-                citta: citta,
-                scala: scala,
-                piano: piano,
-                numeroAppartamento: numeroAppartamento,
-                interno: interno,
-                indirizzoCompleto: `${via}, ${civico} - ${cap} ${citta}`,
-                identificativoAppartamento: `Scala ${scala}, Piano ${piano}, Apt. ${numeroAppartamento}, Interno ${interno}`
-            }));
+        const cercaBtn = document.getElementById('cercaBtn');
+        const cfInput = document.getElementById('codiceFiscale');
+        const errorMsg = document.getElementById('errorMsg');
+        const risultatiContainer = document.getElementById('risultatiContainer');
 
-            // Mostra il loading
-            loadingOverlay.classList.add('show');
-
-            // Simula il caricamento (2 secondi)
-            setTimeout(function() {
-                // Reindirizza alla pagina dei risultati
-                window.location.href = 'results.html';
-            }, 2000);
+        cercaBtn.addEventListener('click', cercaSoggetto);
+        cfInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') cercaSoggetto();
         });
 
-        function resetForm() {
-            searchForm.reset();
-            document.getElementById('via').focus();
+        function cercaSoggetto() {
+            const cf = cfInput.value.trim().toUpperCase();
+            errorMsg.classList.remove('show');
+            risultatiContainer.style.display = 'none';
+
+            if (!cf) {
+                errorMsg.textContent = 'Inserire un codice fiscale.';
+                errorMsg.classList.add('show');
+                return;
+            }
+
+            const soggetto = soggetti[cf];
+            if (!soggetto) {
+                errorMsg.textContent = 'Codice fiscale non trovato nel sistema.';
+                errorMsg.classList.add('show');
+                return;
+            }
+
+            // Popola dati soggetto
+            document.getElementById('soggettoNome').textContent = soggetto.nome;
+            document.getElementById('soggettoDettagli').textContent =
+                `CF: ${cf} · Nato a ${soggetto.nato} il ${soggetto.dataNascita}`;
+            document.getElementById('numProprieta').textContent = soggetto.proprieta.length;
+
+            // Popola lista proprietà
+            const lista = document.getElementById('listaProprieta');
+            lista.innerHTML = '';
+
+            const iconaTipo = (tipo) => {
+                if (tipo === 'Box auto') return '🚗';
+                if (tipo === 'Terreno agricolo') return '🌾';
+                return '🏠';
+            };
+
+            soggetto.proprieta.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'proprieta-card ' + (p.censita ? 'censita' : 'non-censita');
+                card.innerHTML = `
+                    <div class="proprieta-icon">${iconaTipo(p.tipologia)}</div>
+                    <div class="proprieta-info">
+                        <div class="proprieta-indirizzo">${p.via}, ${p.civico} — ${p.citta} (${p.provincia})</div>
+                        <div class="proprieta-dati">${p.tipologia} · Cat. ${p.categoria} · ${p.superficie}</div>
+                    </div>
+                    <div class="proprieta-badge ${p.censita ? 'censita' : 'non-censita'}">
+                        ${p.censita ? '✓ Censita' : 'Non censita'}
+                    </div>
+                `;
+                card.addEventListener('click', () => apriProprieta(p));
+                lista.appendChild(card);
+            });
+
+            risultatiContainer.style.display = 'block';
         }
 
-        // Focus sul primo campo al caricamento
-        window.addEventListener('load', function() {
-            document.getElementById('via').focus();
-        });
+        function apriProprieta(p) {
+            if (!p.censita) {
+                alert(`L'immobile in ${p.via}, ${p.civico} — ${p.citta} non è ancora stato censito nel sistema di valutazione.\n\nContattare l'ufficio tecnico per richiedere il censimento.`);
+                return;
+            }
+            // Salva i dati immobile in sessionStorage per results.html
+            sessionStorage.setItem('immobileData', JSON.stringify(p));
+            window.location.href = 'results.html';
+        }
     </script>
 </body>
 </html>
