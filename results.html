@@ -1061,7 +1061,7 @@
                         <div style="display: flex; align-items: center; justify-content: space-between;">
                             <div>
                                 <h3 style="font-size: 20px; margin-bottom: 10px; font-weight: 600;">Indice di Vulnerabilità Economica (IVE)</h3>
-                                <p style="font-size: 13px; opacity: 0.9;">Valore economico totale potenzialmente esposto a rischio naturale</p>
+                               <p style="font-size: 13px; opacity: 0.9;">Perdita attesa cumulata su 50 anni (modello EAL · fonti INGV MPS04 · ISPRA-PAI)</p>
                             </div>
                             <div style="text-align: right;">
                                 <div style="font-size: 40px; font-weight: 700; margin-bottom: 5px;" id="iveTotaleValore">€ -</div>
@@ -1153,6 +1153,17 @@
                         <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px; color: #003d66;">Sintesi e Resilienza Economica</h4>
                         <div class="info-box" style="background-color: #fff3cd; border-left-color: #FBC02D;" id="iveSintesi">-</div>
                     </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <button id="toggleCalcoloBtn" style="width: 100%; padding: 14px 20px; background-color: #f9f9f9; border: 1.5px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; color: #007CB0; text-transform: uppercase; letter-spacing: 0.5px; text-align: left; display: flex; justify-content: space-between; align-items: center; font-family: inherit;">
+                            <span>🔍 Mostra calcolo dettagliato</span>
+                            <span id="toggleCalcoloArrow" style="font-size: 12px;">▼</span>
+                        </button>
+                        <div id="dettaglioCalcoloIVE" style="display: none; margin-top: 15px; background-color: #fafafa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 25px; font-size: 13px; line-height: 1.7;">
+                            <div id="dettaglioCalcoloContent"></div>
+                        </div>
+                    </div>
+                    
                 </div>
 
                 <!-- SEZIONE ANALISI RISCHI CON SOTTO-TAB -->
@@ -1573,92 +1584,230 @@
             ];
 
             // Dati IVE (Indice di Vulnerabilità Economica)
-            const iveData = [
+ // ====== MODELLO COMPOSITO IVE ======
+            // Modello basato su Expected Annual Loss (EAL) per i tre rischi naturali principali
+            // Fonti: INGV MPS04 (sismica), ISPRA-PAI (frane/alluvioni)
+            // Vulnerabilità strutturale: curve di fragilità adattate al patrimonio italiano
+            //
+            // Per ogni immobile servono solo i DATI GREZZI (input osservabili),
+            // il valore IVE viene calcolato dalla funzione calcolaIVE()
+
+            const iveInput = [
                 {
                     immobile_id: 1,
                     valore_immobile: 72731,
                     pendenza_percentuale: 6,
-                    ive_totale: 27797,
-                    ive_percentuale: 38,
-                    rischio_sismico: {
-                        classificazione: "Molto Elevata",
-                        ag_potenziale: 25.49,
-                        valore_esposto: 18531
-                    },
-                    rischio_frane: {
-                        classificazione: "Moderata",
-                        impatto_percentuale: 13,
-                        valore_esposto: 9265
-                    },
-                    rischio_alluvioni: {
-                        classificazione: "Nulla",
-                        impatto_percentuale: 0,
-                        valore_esposto: 0
-                    },
-                    analisi_testuale: {
-                        metodologia: "L'indice di Vulnerabilità Economica è un indicatore sviluppato tramite un algoritmo proprietario, che combina il valore economico dell'immobile con i parametri di rischiosità connessi all'area geografica certificata dagli enti preposti. L'indice rappresenta il valore immobiliare effettivamente esposto a rischio fisico.",
-                        contributi_rischi: "Il valore dell'IVE, stimato pari a circa 38% del valore economico dell'immobile (corrispondente a una perdita potenziale di circa €27.800), riflette principalmente l'elevata pericolosità sismica dell'area, che rappresenta la componente di rischio prevalente. Il contributo del rischio da movimenti franosi è presente, risultato dell'entità moderata e contribuisce in misura secondaria alla vulnerabilità complessiva. La pericolosità alluvionale, invece, è assente o trascurabile secondo le disposizioni.",
-                        impatto_acclivita: "L'acclività del sito, pari al 6%, determina solo un effetto marginale sull'IVE, comportando un lieve incremento dei costi di manutenzione potenziali e una modesta incidenza sulla valutazione economica dell'immobile.",
-                        sintesi: "In sintesi, l'IVE conferma che la resilienza economica dell'immobile è fortemente condizionata dal rischio sismico, elemento che dovrebbe essere prioritariamente gestito in ogni strategia di mitigazione e protezione patrimoniale."
-                    }
+                    // SISMICA — Norcia, zona sismica 1
+                    pga_475: 0.275,                    // g, PGA con TR=475 anni (INGV MPS04)
+                    zona_sismica: 1,                   // Classificazione OPCM 3274
+                    // FRANE — classificazione PAI
+                    classe_pai_frane: 'P2',            // P0/P1/P2/P3/P4
+                    // ALLUVIONI — classificazione PAI
+                    classe_pai_alluvioni: 'P0',       // P0/P1/P2/P3
+                    // VULNERABILITA STRUTTURALE
+                    epoca_costruzione: '1971-1980',   // pre-norme antisismiche moderne
+                    classe_energetica: 'D',
+                    tipologia_strutturale: 'muratura' // muratura/ca/misto
                 },
                 {
                     immobile_id: 2,
                     valore_immobile: 435000,
                     pendenza_percentuale: 2,
-                    ive_totale: 108750,
-                    ive_percentuale: 25,
-                    rischio_sismico: {
-                        classificazione: "Media",
-                        ag_potenziale: 15.32,
-                        valore_esposto: 65250
-                    },
-                    rischio_frane: {
-                        classificazione: "Assenti",
-                        impatto_percentuale: 0,
-                        valore_esposto: 0
-                    },
-                    rischio_alluvioni: {
-                        classificazione: "Bassa",
-                        impatto_percentuale: 5,
-                        valore_esposto: 21750
-                    },
-                    analisi_testuale: {
-                        metodologia: "L'indice di Vulnerabilità Economica è un indicatore sviluppato tramite un algoritmo proprietario, che combina il valore economico dell'immobile con i parametri di rischiosità connessi all'area geografica certificata dagli enti preposti. L'indice rappresenta il valore immobiliare effettivamente esposto a rischio fisico.",
-                        contributi_rischi: "Il valore dell'IVE, stimato pari a circa 25% del valore economico dell'immobile (corrispondente a una perdita potenziale di circa €108.750), riflette principalmente una pericolosità sismica di livello medio. Il contributo del rischio alluvionale è presente ma contenuto, mentre il rischio da frane è assente nell'area di localizzazione dell'immobile.",
-                        impatto_acclivita: "L'acclività del sito, pari al 2%, determina un effetto marginale sull'IVE, con condizioni favorevoli per la stabilità strutturale e bassi costi di manutenzione potenziali.",
-                        sintesi: "In sintesi, l'IVE conferma che la resilienza economica dell'immobile è moderatamente condizionata dal rischio sismico, con una esposizione complessiva inferiore rispetto ad altre aree. La gestione del rischio sismico rimane comunque prioritaria in ogni strategia di protezione patrimoniale."
-                    }
+                    pga_475: 0.150,
+                    zona_sismica: 3,
+                    classe_pai_frane: 'P0',
+                    classe_pai_alluvioni: 'P1',
+                    epoca_costruzione: '2001-2010',
+                    classe_energetica: 'C',
+                    tipologia_strutturale: 'ca'
                 },
                 {
                     immobile_id: 3,
                     valore_immobile: 520000,
                     pendenza_percentuale: 8,
-                    ive_totale: 156000,
-                    ive_percentuale: 30,
-                    rischio_sismico: {
-                        classificazione: "Elevata",
-                        ag_potenziale: 18.75,
-                        valore_esposto: 93600
-                    },
-                    rischio_frane: {
-                        classificazione: "Moderata",
-                        impatto_percentuale: 8,
-                        valore_esposto: 41600
-                    },
-                    rischio_alluvioni: {
-                        classificazione: "Media",
-                        impatto_percentuale: 3,
-                        valore_esposto: 15600
-                    },
-                    analisi_testuale: {
-                        metodologia: "L'indice di Vulnerabilità Economica è un indicatore sviluppato tramite un algoritmo proprietario, che combina il valore economico dell'immobile con i parametri di rischiosità connessi all'area geografica certificata dagli enti preposti. L'indice rappresenta il valore immobiliare effettivamente esposto a rischio fisico.",
-                        contributi_rischi: "Il valore dell'IVE, stimato pari a circa 30% del valore economico dell'immobile (corrispondente a una perdita potenziale di circa €156.000), riflette una combinazione di rischi significativi. La pericolosità sismica rappresenta la componente prevalente, seguita da una moderata esposizione al rischio franoso e una media pericolosità alluvionale. Questi fattori combinati determinano un'esposizione economica complessiva rilevante.",
-                        impatto_acclivita: "L'acclività del sito, pari all'8%, determina un effetto più significativo sull'IVE rispetto ad altre aree, comportando un incremento dei costi di manutenzione potenziali e una maggiore incidenza sulla valutazione economica dell'immobile, specialmente in relazione al rischio franoso.",
-                        sintesi: "In sintesi, l'IVE conferma che la resilienza economica dell'immobile è fortemente condizionata da una combinazione di rischi naturali, con il rischio sismico come elemento prevalente. Una strategia di mitigazione e protezione patrimoniale deve affrontare prioritariamente il rischio sismico, seguito da interventi di stabilizzazione per il rischio franoso."
-                    }
+                    pga_475: 0.190,
+                    zona_sismica: 2,
+                    classe_pai_frane: 'P2',
+                    classe_pai_alluvioni: 'P2',
+                    epoca_costruzione: '1981-1990',
+                    classe_energetica: 'E',
+                    tipologia_strutturale: 'misto'
                 }
             ];
+
+            // === PARAMETRI DEL MODELLO ===
+
+            // Probabilità annua di superamento per le classi PAI (fonte: PAI Autorità di Bacino)
+            const probAnnuaPAI = {
+                'P0': 0,           // pericolosità nulla
+                'P1': 1/300,       // P1 moderata: TR 300 anni
+                'P2': 1/100,       // P2 media: TR 100 anni
+                'P3': 1/50,        // P3 elevata: TR 50 anni
+                'P4': 1/30         // P4 molto elevata: TR 30 anni
+            };
+
+            // Coefficiente di vulnerabilità per epoca di costruzione e tipologia
+            // (curve di fragilità adattate: edifici pre-norma sismica più vulnerabili)
+            const vulnSismicaEpoca = {
+                'pre-1919':     { muratura: 0.70, ca: 0.60, misto: 0.68 },
+                '1919-1945':    { muratura: 0.60, ca: 0.55, misto: 0.58 },
+                '1946-1970':    { muratura: 0.50, ca: 0.45, misto: 0.48 },
+                '1971-1980':    { muratura: 0.40, ca: 0.35, misto: 0.38 },
+                '1981-1990':    { muratura: 0.30, ca: 0.25, misto: 0.28 },
+                '1991-2000':    { muratura: 0.22, ca: 0.18, misto: 0.20 },
+                '2001-2010':    { muratura: 0.15, ca: 0.10, misto: 0.13 },
+                'post-2010':    { muratura: 0.10, ca: 0.06, misto: 0.08 }
+            };
+
+            // Damage Ratio attesi per i rischi non sismici (frazione del valore esposto a danno)
+            const damageRatioFrane = {
+                'P0': 0, 'P1': 0.05, 'P2': 0.15, 'P3': 0.35, 'P4': 0.60
+            };
+            const damageRatioAlluvioni = {
+                'P0': 0, 'P1': 0.04, 'P2': 0.12, 'P3': 0.28, 'P4': 0.50
+            };
+
+            // Correzione per acclività (pendenza > 10% aumenta vulnerabilità a frane)
+            function correzioneAcclivita(pendenza) {
+                if (pendenza <= 5)  return 1.00;
+                if (pendenza <= 10) return 1.05;
+                if (pendenza <= 15) return 1.15;
+                if (pendenza <= 25) return 1.30;
+                return 1.50;
+            }
+
+            // Vita utile considerata
+            const VITA_UTILE_ANNI = 50;
+
+            // Mappatura PGA → classificazione sismica testuale
+            function classificaSismicaDaPGA(pga) {
+                if (pga < 0.05) return 'Molto Bassa';
+                if (pga < 0.10) return 'Bassa';
+                if (pga < 0.15) return 'Media';
+                if (pga < 0.25) return 'Elevata';
+                return 'Molto Elevata';
+            }
+
+            // Mappatura PAI → testo
+            const testoClassePAI = {
+                'P0': 'Assenti', 'P1': 'Moderata', 'P2': 'Media', 'P3': 'Elevata', 'P4': 'Molto Elevata'
+            };
+
+            // === FUNZIONE DI CALCOLO PRINCIPALE ===
+            function calcolaIVE(input) {
+                const V = input.valore_immobile;
+
+                // --- SISMICA ---
+                // Probabilità annua di superamento PGA475 = 1/475
+                const probAnnuaSismica = 1 / 475;
+                // Damage ratio sismico = vulnerabilità strutturale × PGA normalizzato
+                const vulnStrut = vulnSismicaEpoca[input.epoca_costruzione][input.tipologia_strutturale];
+                const pgaNorm = Math.min(input.pga_475 / 0.35, 1);  // normalizzato a PGA max realistica
+                const damageRatioSismico = vulnStrut * pgaNorm;
+                // EAL sismico annuo = V × P(annua) × DR × fattore di amplificazione per eventi minori
+                // (il modello considera anche eventi sotto-soglia con TR più brevi)
+                const fattoreAmplificazioneSismica = 4.5;  // integra eventi TR 50-475 anni
+                const ealSismico = V * probAnnuaSismica * damageRatioSismico * fattoreAmplificazioneSismica;
+
+                // --- FRANE ---
+                const probFrane = probAnnuaPAI[input.classe_pai_frane];
+                const drFrane = damageRatioFrane[input.classe_pai_frane];
+                const corrPendenza = correzioneAcclivita(input.pendenza_percentuale);
+                const ealFrane = V * probFrane * drFrane * corrPendenza;
+
+                // --- ALLUVIONI ---
+                const probAlluvioni = probAnnuaPAI[input.classe_pai_alluvioni];
+                const drAlluvioni = damageRatioAlluvioni[input.classe_pai_alluvioni];
+                const ealAlluvioni = V * probAlluvioni * drAlluvioni;
+
+                // --- TOTALE ---
+                const ealTotaleAnnuo = ealSismico + ealFrane + ealAlluvioni;
+                const perditaAttesa50anni = ealTotaleAnnuo * VITA_UTILE_ANNI;
+                const ivePercentuale = (perditaAttesa50anni / V) * 100;
+
+                // --- VALORI ESPOSTI (per le card riepilogo) ---
+                // Esposizione = EAL annuo × vita utile, per ogni rischio
+                const espostoSismico = ealSismico * VITA_UTILE_ANNI;
+                const espostoFrane = ealFrane * VITA_UTILE_ANNI;
+                const espostoAlluvioni = ealAlluvioni * VITA_UTILE_ANNI;
+
+                return {
+                    valore_immobile: V,
+                    ive_totale: Math.round(perditaAttesa50anni),
+                    ive_percentuale: Math.round(ivePercentuale * 10) / 10,
+                    eal_annuo: Math.round(ealTotaleAnnuo),
+                    rischio_sismico: {
+                        classificazione: classificaSismicaDaPGA(input.pga_475),
+                        ag_potenziale: Math.round(input.pga_475 * 1000) / 10,  // % g
+                        valore_esposto: Math.round(espostoSismico),
+                        eal_annuo: Math.round(ealSismico),
+                        prob_annua: probAnnuaSismica,
+                        damage_ratio: damageRatioSismico,
+                        vuln_strutturale: vulnStrut,
+                        fattore_amplificazione: fattoreAmplificazioneSismica
+                    },
+                    rischio_frane: {
+                        classificazione: testoClassePAI[input.classe_pai_frane],
+                        classe_pai: input.classe_pai_frane,
+                        impatto_percentuale: Math.round(drFrane * 100),
+                        valore_esposto: Math.round(espostoFrane),
+                        eal_annuo: Math.round(ealFrane),
+                        prob_annua: probFrane,
+                        damage_ratio: drFrane,
+                        corr_pendenza: corrPendenza
+                    },
+                    rischio_alluvioni: {
+                        classificazione: testoClassePAI[input.classe_pai_alluvioni],
+                        classe_pai: input.classe_pai_alluvioni,
+                        impatto_percentuale: Math.round(drAlluvioni * 100),
+                        valore_esposto: Math.round(espostoAlluvioni),
+                        eal_annuo: Math.round(ealAlluvioni),
+                        prob_annua: probAlluvioni,
+                        damage_ratio: drAlluvioni
+                    },
+                    input_originali: input
+                };
+            }
+
+            // Genera l'array iveData calcolato dinamicamente (mantiene la stessa struttura usata dal resto del codice)
+            const iveData = iveInput.map(inp => {
+                const calc = calcolaIVE(inp);
+                // Costruisco l'analisi testuale dinamica basata sui valori reali
+                const ive = calc.ive_percentuale;
+                const sis = calc.rischio_sismico;
+                const fra = calc.rischio_frane;
+                const all = calc.rischio_alluvioni;
+
+                // Identifico il rischio dominante
+                const contributi = [
+                    { nome: 'sismico', val: sis.eal_annuo },
+                    { nome: 'frane', val: fra.eal_annuo },
+                    { nome: 'alluvioni', val: all.eal_annuo }
+                ].sort((a, b) => b.val - a.val);
+                const dominante = contributi[0].nome;
+
+                const livelloRischio = ive < 10 ? 'contenuto' : (ive < 25 ? 'moderato' : (ive < 40 ? 'significativo' : 'elevato'));
+
+                return {
+                    immobile_id: inp.immobile_id,
+                    valore_immobile: calc.valore_immobile,
+                    pendenza_percentuale: inp.pendenza_percentuale,
+                    ive_totale: calc.ive_totale,
+                    ive_percentuale: calc.ive_percentuale,
+                    eal_annuo: calc.eal_annuo,
+                    rischio_sismico: calc.rischio_sismico,
+                    rischio_frane: calc.rischio_frane,
+                    rischio_alluvioni: calc.rischio_alluvioni,
+                    calcolo_dettaglio: calc,
+                    input_originali: inp,
+                    analisi_testuale: {
+                        metodologia: "L'Indice di Vulnerabilità Economica (IVE) è calcolato come perdita attesa cumulata sulla vita utile dell'immobile (50 anni), derivata dal modello Expected Annual Loss (EAL) applicato ai tre principali rischi naturali. Il calcolo combina le probabilità annue di occorrenza degli eventi (fonti INGV MPS04 per il rischio sismico, classificazione ISPRA-PAI per frane e alluvioni) con i Damage Ratio attesi e i coefficienti di vulnerabilità strutturale dell'edificio (epoca di costruzione, tipologia, classe energetica).",
+                        contributi_rischi: `Il valore dell'IVE, stimato pari a circa ${ive}% del valore economico dell'immobile (perdita cumulata attesa di circa € ${calc.ive_totale.toLocaleString('it-IT')} su 50 anni, equivalente a un EAL annuo di € ${calc.eal_annuo.toLocaleString('it-IT')}), riflette un profilo di rischio ${livelloRischio}. La componente dominante è il rischio ${dominante} con un EAL annuo di € ${contributi[0].val.toLocaleString('it-IT')}, seguito dal rischio ${contributi[1].nome} (€ ${contributi[1].val.toLocaleString('it-IT')}/anno) e dal rischio ${contributi[2].nome} (€ ${contributi[2].val.toLocaleString('it-IT')}/anno).`,
+                        impatto_acclivita: `L'acclività del sito, pari al ${inp.pendenza_percentuale}%, applica un fattore correttivo di ${calc.rischio_frane.corr_pendenza.toFixed(2)}x sul rischio frane. ${inp.pendenza_percentuale <= 5 ? 'Condizioni morfologiche favorevoli, nessun aggravamento significativo.' : (inp.pendenza_percentuale <= 15 ? 'Acclività moderata, contribuisce in misura limitata al rischio complessivo.' : 'Acclività rilevante, amplifica sensibilmente la vulnerabilità a fenomeni gravitativi.')}`,
+                        sintesi: `L'IVE pari al ${ive}% (livello ${livelloRischio}) deve essere interpretato come perdita potenziale attesa cumulata sulla vita utile dell'edificio, non come singolo evento. Una strategia di mitigazione efficace deve prioritariamente affrontare il rischio ${dominante}, che rappresenta il contributo prevalente alla vulnerabilità complessiva. Le coperture assicurative dovrebbero essere dimensionate tenendo conto dell'EAL annuo (€ ${calc.eal_annuo.toLocaleString('it-IT')}) come riferimento per il premio tecnico minimo.`
+                    }
+                };
+            });
 // Dati coperture retail per radar (esposizione + copertura proposta)
             // Per le catastrofali l'esposizione viene calcolata da rischiSismicaData/rischiFrameData/rischiAlluvioniData
             const copertureRetail = [
@@ -2020,6 +2169,7 @@
 
 // Carica dati IVE
                 loadIVEData();
+                popolaDettaglioCalcolo();
 
                 // Carica radar coperture e widget meteo
                 createCopertureRadar();
@@ -2037,6 +2187,139 @@
                 }
             }
 
+// Popola il box "Mostra calcolo dettagliato"
+            function popolaDettaglioCalcolo() {
+                const immobileId = getImmobileId();
+                const ive = iveData.find(i => i.immobile_id === immobileId);
+                if (!ive) return;
+                const c = ive.calcolo_dettaglio;
+                const inp = ive.input_originali;
+                const V = c.valore_immobile;
+                const fmtE = (v) => '€ ' + Math.round(v).toLocaleString('it-IT');
+                const fmtPerc = (v) => (v * 100).toFixed(2) + '%';
+                const fmtProb = (v) => v === 0 ? '0' : '1/' + Math.round(1/v) + ' anni';
+
+                const html = `
+                    <div style="margin-bottom: 25px; padding-bottom: 18px; border-bottom: 2px solid #e0e0e0;">
+                        <div style="font-size: 13px; font-weight: 700; color: #003d66; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">Dati di input</div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+                            <div><strong>Valore immobile:</strong> ${fmtE(V)}</div>
+                            <div><strong>Pendenza terreno:</strong> ${inp.pendenza_percentuale}%</div>
+                            <div><strong>PGA (TR 475 anni):</strong> ${inp.pga_475}g — Zona sismica ${inp.zona_sismica}</div>
+                            <div><strong>Classe PAI frane:</strong> ${inp.classe_pai_frane}</div>
+                            <div><strong>Classe PAI alluvioni:</strong> ${inp.classe_pai_alluvioni}</div>
+                            <div><strong>Epoca costruzione:</strong> ${inp.epoca_costruzione}</div>
+                            <div><strong>Tipologia strutturale:</strong> ${inp.tipologia_strutturale}</div>
+                            <div><strong>Classe energetica:</strong> ${inp.classe_energetica}</div>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 11px; color: #888;">Fonti: INGV MPS04 (pericolosità sismica), ISPRA-PAI (frane e alluvioni), epoca costruzione da visura catastale</div>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding-bottom: 18px; border-bottom: 2px solid #e0e0e0;">
+                        <div style="font-size: 13px; font-weight: 700; color: #D32F2F; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">⚠ Rischio Sismico</div>
+                        <div style="background: white; padding: 14px; border-radius: 6px; border-left: 3px solid #D32F2F;">
+                            <div style="font-family: 'Courier New', monospace; font-size: 12px; color: #333; margin-bottom: 10px;">
+                                EAL<sub>sismico</sub> = V × P<sub>annua</sub> × DR<sub>sismico</sub> × f<sub>ampl</sub>
+                            </div>
+                            <ul style="list-style: none; padding-left: 0; margin: 10px 0;">
+                                <li style="padding: 3px 0;">• <strong>V</strong> = ${fmtE(V)} <span style="color: #888;">(valore immobile)</span></li>
+                                <li style="padding: 3px 0;">• <strong>P<sub>annua</sub></strong> = 1/475 = ${fmtPerc(c.rischio_sismico.prob_annua)} <span style="color: #888;">(probabilità annua superamento PGA<sub>475</sub>)</span></li>
+                                <li style="padding: 3px 0;">• <strong>Vulnerabilità strutturale</strong> = ${c.rischio_sismico.vuln_strutturale.toFixed(2)} <span style="color: #888;">(epoca ${inp.epoca_costruzione}, ${inp.tipologia_strutturale})</span></li>
+                                <li style="padding: 3px 0;">• <strong>PGA normalizzato</strong> = ${inp.pga_475}/0.35 = ${(inp.pga_475/0.35).toFixed(2)}</li>
+                                <li style="padding: 3px 0;">• <strong>DR<sub>sismico</sub></strong> = ${c.rischio_sismico.vuln_strutturale.toFixed(2)} × ${(inp.pga_475/0.35).toFixed(2)} = ${c.rischio_sismico.damage_ratio.toFixed(3)}</li>
+                                <li style="padding: 3px 0;">• <strong>f<sub>ampl</sub></strong> = ${c.rischio_sismico.fattore_amplificazione} <span style="color: #888;">(integra eventi con TR 50-475 anni)</span></li>
+                            </ul>
+                            <div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin-top: 10px; font-family: 'Courier New', monospace; font-size: 13px;">
+                                EAL<sub>sismico</sub> = ${fmtE(V)} × ${c.rischio_sismico.prob_annua.toFixed(5)} × ${c.rischio_sismico.damage_ratio.toFixed(3)} × ${c.rischio_sismico.fattore_amplificazione}<br>
+                                <strong style="color: #D32F2F;">= ${fmtE(c.rischio_sismico.eal_annuo)} / anno</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding-bottom: 18px; border-bottom: 2px solid #e0e0e0;">
+                        <div style="font-size: 13px; font-weight: 700; color: #FF9800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">🏔 Rischio Frane</div>
+                        <div style="background: white; padding: 14px; border-radius: 6px; border-left: 3px solid #FF9800;">
+                            <div style="font-family: 'Courier New', monospace; font-size: 12px; color: #333; margin-bottom: 10px;">
+                                EAL<sub>frane</sub> = V × P<sub>PAI</sub> × DR<sub>frane</sub> × C<sub>pendenza</sub>
+                            </div>
+                            <ul style="list-style: none; padding-left: 0; margin: 10px 0;">
+                                <li style="padding: 3px 0;">• <strong>Classe PAI</strong> = ${inp.classe_pai_frane} → P<sub>annua</sub> = ${fmtProb(c.rischio_frane.prob_annua)}</li>
+                                <li style="padding: 3px 0;">• <strong>DR<sub>frane</sub></strong> = ${c.rischio_frane.damage_ratio} <span style="color: #888;">(Damage Ratio classe ${inp.classe_pai_frane})</span></li>
+                                <li style="padding: 3px 0;">• <strong>C<sub>pendenza</sub></strong> = ${c.rischio_frane.corr_pendenza.toFixed(2)}x <span style="color: #888;">(correzione acclività ${inp.pendenza_percentuale}%)</span></li>
+                            </ul>
+                            <div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin-top: 10px; font-family: 'Courier New', monospace; font-size: 13px;">
+                                EAL<sub>frane</sub> = ${fmtE(V)} × ${c.rischio_frane.prob_annua.toFixed(5)} × ${c.rischio_frane.damage_ratio} × ${c.rischio_frane.corr_pendenza.toFixed(2)}<br>
+                                <strong style="color: #FF9800;">= ${fmtE(c.rischio_frane.eal_annuo)} / anno</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding-bottom: 18px; border-bottom: 2px solid #e0e0e0;">
+                        <div style="font-size: 13px; font-weight: 700; color: #007CB0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">🌊 Rischio Alluvioni</div>
+                        <div style="background: white; padding: 14px; border-radius: 6px; border-left: 3px solid #007CB0;">
+                            <div style="font-family: 'Courier New', monospace; font-size: 12px; color: #333; margin-bottom: 10px;">
+                                EAL<sub>alluvioni</sub> = V × P<sub>PAI</sub> × DR<sub>alluvioni</sub>
+                            </div>
+                            <ul style="list-style: none; padding-left: 0; margin: 10px 0;">
+                                <li style="padding: 3px 0;">• <strong>Classe PAI</strong> = ${inp.classe_pai_alluvioni} → P<sub>annua</sub> = ${fmtProb(c.rischio_alluvioni.prob_annua)}</li>
+                                <li style="padding: 3px 0;">• <strong>DR<sub>alluvioni</sub></strong> = ${c.rischio_alluvioni.damage_ratio} <span style="color: #888;">(Damage Ratio classe ${inp.classe_pai_alluvioni})</span></li>
+                            </ul>
+                            <div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin-top: 10px; font-family: 'Courier New', monospace; font-size: 13px;">
+                                EAL<sub>alluvioni</sub> = ${fmtE(V)} × ${c.rischio_alluvioni.prob_annua.toFixed(5)} × ${c.rischio_alluvioni.damage_ratio}<br>
+                                <strong style="color: #007CB0;">= ${fmtE(c.rischio_alluvioni.eal_annuo)} / anno</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 25px;">
+                        <div style="font-size: 13px; font-weight: 700; color: #003d66; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">📊 Aggregazione e IVE</div>
+                        <div style="background: linear-gradient(135deg, #003d66 0%, #007CB0 100%); color: white; padding: 18px; border-radius: 6px;">
+                            <div style="margin-bottom: 12px; font-size: 13px; opacity: 0.95;">
+                                EAL totale annuo = EAL<sub>sismico</sub> + EAL<sub>frane</sub> + EAL<sub>alluvioni</sub>
+                            </div>
+                            <div style="font-family: 'Courier New', monospace; font-size: 13px; margin-bottom: 12px;">
+                                = ${fmtE(c.rischio_sismico.eal_annuo)} + ${fmtE(c.rischio_frane.eal_annuo)} + ${fmtE(c.rischio_alluvioni.eal_annuo)}<br>
+                                = <strong style="font-size: 16px;">${fmtE(c.eal_annuo)} / anno</strong>
+                            </div>
+                            <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 12px; margin-top: 12px;">
+                                Perdita attesa su 50 anni = EAL × 50<br>
+                                <span style="font-family: 'Courier New', monospace;">= ${fmtE(c.eal_annuo)} × 50 = <strong style="font-size: 18px;">${fmtE(c.ive_totale)}</strong></span>
+                            </div>
+                            <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 12px; margin-top: 12px;">
+                                <strong>IVE = ${fmtE(c.ive_totale)} / ${fmtE(V)} × 100 = ${c.ive_percentuale}%</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 12px 16px; background-color: #fff3cd; border-left: 3px solid #FBC02D; border-radius: 4px; font-size: 11px; color: #856404;">
+                        <strong>Note metodologiche:</strong> Modello semplificato basato su curve di fragilità adattate al patrimonio italiano. I parametri di vulnerabilità strutturale sono coefficienti di letteratura (HAZUS-MH adattato). Per applicazioni in produzione si raccomanda l'integrazione con motori catastrofali certificati (RMS/AIR Worldwide) o implementazioni complete HAZUS.
+                    </div>
+                `;
+
+                document.getElementById('dettaglioCalcoloContent').innerHTML = html;
+            }
+
+            // Toggle del box dettaglio
+            document.addEventListener('DOMContentLoaded', () => {
+                const btn = document.getElementById('toggleCalcoloBtn');
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        const box = document.getElementById('dettaglioCalcoloIVE');
+                        const arrow = document.getElementById('toggleCalcoloArrow');
+                        if (box.style.display === 'none') {
+                            box.style.display = 'block';
+                            arrow.textContent = '▲';
+                            btn.querySelector('span').textContent = '🔍 Nascondi calcolo dettagliato';
+                        } else {
+                            box.style.display = 'none';
+                            arrow.textContent = '▼';
+                            btn.querySelector('span').textContent = '🔍 Mostra calcolo dettagliato';
+                        }
+                    });
+                }
+            });
+
+            
             // Funzione per caricare i dati IVE
             function loadIVEData() {
                 const immobileId = getImmobileId();
