@@ -431,6 +431,29 @@
             flex: 1;
         }
 
+/* Slider raggio */
+        #raggioSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #007CB0;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        #raggioSlider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #007CB0;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        
         /* MEDIA QUERY PER MOBILE (Chiusa correttamente) */
         @media (max-width: 768px) {
             .tabs-header {
@@ -803,6 +826,26 @@
                     <!-- TAB: Dinamica Mercato -->
                     <div id="tab-dinamica-mercato" class="tab-content active">
                         <div class="section-title">Dinamicità Mercato Residenziale</div>
+                        <div style="background-color: #f0f7fb; border-left: 3px solid #007CB0; padding: 18px 22px; border-radius: 6px; margin-bottom: 25px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <div style="font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Raggio di ricerca</div>
+                                    <div style="font-size: 11px; color: #888; margin-top: 2px;">Area circostante l'immobile considerata per il calcolo</div>
+                                </div>
+                                <div style="font-size: 24px; font-weight: 700; color: #007CB0;">
+                                    <span id="raggioValore">2,0</span> km
+                                </div>
+                            </div>
+                            <input type="range" id="raggioSlider" min="0.5" max="10" step="0.5" value="2"
+                                style="width: 100%; height: 6px; -webkit-appearance: none; appearance: none; background: linear-gradient(to right, #86BC25 0%, #007CB0 100%); border-radius: 3px; outline: none; cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; margin-top: 6px;">
+                                <span>0,5 km</span>
+                                <span>2,5 km</span>
+                                <span>5 km</span>
+                                <span>7,5 km</span>
+                                <span>10 km</span>
+                            </div>
+                        </div>
                         <div class="data-grid">
                             <div class="data-card">
                                 <div class="data-card-label">Zona Immobiliare</div>
@@ -895,8 +938,7 @@
                     <div id="tab-compravendite" class="tab-content">
     <div class="section-title">Ripartizione Compravendite</div>
     <div style="background-color: #f0f7fb; border-left: 3px solid #007CB0; padding: 12px 16px; border-radius: 4px; margin-bottom: 20px; font-size: 13px; color: #333;">
-        <strong>Dati riferiti a:</strong> <span id="zonaCompravendite">-</span> <span style="color: #666;">(<span id="posizioneZonaCompravendite">-</span>)</span>
-    </div>
+       <strong>Dati riferiti a:</strong> <span id="zonaCompravendite">-</span> <span style="color: #666;">(<span id="posizioneZonaCompravendite">-</span>) — Raggio: <span id="raggioCompravendite">2,0</span> km</span>    </div>
     <div class="data-grid">
         <div class="data-card">
             <div class="data-card-label">Compravendite Residenziali 2025</div>
@@ -1835,6 +1877,110 @@
                     document.getElementById('statoEdificio').textContent = descrizione.stato_edificio;
                 }
 
+
+// ====== QUOTAZIONI PER RAGGIO ======
+            // Base dati simulata: valori centrali e curve di decadimento per immobile
+            // Logica: l'immobile id=1 (Norcia) è in centro storico, quindi più ci si allontana
+            // più i valori calano per residenziale, salgono leggermente per commerciale periferico,
+            // calano per posti auto, e le compravendite aumentano in valore assoluto.
+            const quotazioniBase = {
+                1: {
+                    // Norcia - centro storico
+                    residenzialeCentro: 75500,
+                    commercialeCentro: 78000,
+                    postiAutoCentro: 19500,
+                    andamentoCentro: 1.8,
+                    compravenditeBase: 41,
+                    // coefficienti di variazione per km (negativi = il valore cala uscendo)
+                    decResidenziale: -0.045,   // -4,5% per km
+                    decCommerciale: -0.030,    // -3% per km
+                    decPostiAuto: -0.055,      // -5,5% per km (sensibile)
+                    decAndamento: -0.080,      // l'andamento si appiattisce uscendo
+                    incCompravendite: 0.65     // +65% di compravendite per km di raggio
+                },
+                2: {
+                    residenzialeCentro: 5200,
+                    commercialeCentro: 5400,
+                    postiAutoCentro: 1600,
+                    andamentoCentro: -0.3,
+                    compravenditeBase: 85,
+                    decResidenziale: -0.025,
+                    decCommerciale: -0.020,
+                    decPostiAuto: -0.040,
+                    decAndamento: -0.050,
+                    incCompravendite: 0.55
+                },
+                3: {
+                    residenzialeCentro: 4500,
+                    commercialeCentro: 4700,
+                    postiAutoCentro: 1450,
+                    andamentoCentro: 1.8,
+                    compravenditeBase: 62,
+                    decResidenziale: -0.035,
+                    decCommerciale: -0.025,
+                    decPostiAuto: -0.050,
+                    decAndamento: -0.060,
+                    incCompravendite: 0.60
+                }
+            };
+
+            function ricalcolaQuotazioni(raggioKm) {
+                const id = getImmobileId();
+                const b = quotazioniBase[id] || quotazioniBase[1];
+
+                // Fattore di scala radiale: usa raggio - 1 come "distanza media dal centro"
+                // così a 1 km i valori sono ~quelli del centro, oltre calano
+                const r = Math.max(0, raggioKm - 1);
+
+                const res = Math.round(b.residenzialeCentro * (1 + b.decResidenziale * r));
+                const com = Math.round(b.commercialeCentro * (1 + b.decCommerciale * r));
+                const auto = Math.round(b.postiAutoCentro * (1 + b.decPostiAuto * r));
+
+                // Andamenti percentuali (con segno)
+                const andRes = (b.andamentoCentro * (1 + b.decAndamento * r)).toFixed(1);
+                const andCom = ((b.andamentoCentro + 0.4) * (1 + b.decAndamento * r)).toFixed(1);
+                const andAuto = ((b.andamentoCentro - 0.3) * (1 + b.decAndamento * r)).toFixed(1);
+
+                // Compravendite: crescono con l'area (circa quadrato del raggio)
+                const fattoreArea = Math.pow(raggioKm / 2, 1.6);  // 2 km = baseline
+                const cvRes = Math.round(b.compravenditeBase * fattoreArea);
+                const cvNonRes = Math.round(b.compravenditeBase * 0.78 * fattoreArea);
+                const cvAuto = Math.round(b.compravenditeBase * 0.55 * fattoreArea);
+
+                // Formattazione € italiana
+                const fmtEuro = (v) => '€ ' + v.toLocaleString('it-IT');
+                const fmtPerc = (v) => (v >= 0 ? '+' : '') + v + '%';
+
+                document.getElementById('quotazioneMediaResidenziale').textContent = fmtEuro(res);
+                document.getElementById('quotazioneMediaCommerciale').textContent = fmtEuro(com);
+                document.getElementById('quotazioneMediaPostiAuto').textContent = fmtEuro(auto);
+
+                document.getElementById('andamento2024Residenziale').textContent = fmtPerc(andRes);
+                document.getElementById('andamento2024Commerciale').textContent = fmtPerc(andCom);
+                document.getElementById('andamento2024PostiAuto').textContent = fmtPerc(andAuto);
+
+                document.getElementById('compravenditeResidenziali').textContent = cvRes;
+                document.getElementById('compravenditeNonResidenziali').textContent = cvNonRes;
+                document.getElementById('compravenditePostiAuto').textContent = cvAuto;
+
+                // Aggiorna l'etichetta del raggio nel banner del tab Compravendite (se esiste)
+                const etichettaRaggio = document.getElementById('raggioCompravendite');
+                if (etichettaRaggio) etichettaRaggio.textContent = raggioKm.toString().replace('.', ',');
+            }
+
+            // Listener slider
+            const raggioSlider = document.getElementById('raggioSlider');
+            const raggioValore = document.getElementById('raggioValore');
+            if (raggioSlider) {
+                raggioSlider.addEventListener('input', (e) => {
+                    const val = parseFloat(e.target.value);
+                    raggioValore.textContent = val.toString().replace('.', ',');
+                    ricalcolaQuotazioni(val);
+                });
+                // Inizializza con valore di default
+                ricalcolaQuotazioni(parseFloat(raggioSlider.value));
+            }
+                
                 // Carica dati mercato
                 const mercato = mercatoData.find(m => m.immobile_id === immobileId);
                 if (mercato) {
@@ -1843,15 +1989,6 @@
                     document.getElementById('tipologiaPrevalente').textContent = mercato.tipologia_prevalente;
                     document.getElementById('stockResidenziale').textContent = mercato.stock_residenziale;
                     document.getElementById('dinamicaMercato').textContent = mercato.dinamica_mercato_percentuale;
-                    document.getElementById('quotazioneMediaResidenziale').textContent = mercato.quotazione_media_residenziale;
-                    document.getElementById('quotazioneMediaCommerciale').textContent = mercato.quotazione_media_commerciale;
-                    document.getElementById('quotazioneMediaPostiAuto').textContent = mercato.quotazione_media_posti_auto;
-                    document.getElementById('andamento2024Residenziale').textContent = mercato.andamento_2024_residenziale;
-                    document.getElementById('andamento2024Commerciale').textContent = mercato.andamento_2024_commerciale;
-                    document.getElementById('andamento2024PostiAuto').textContent = mercato.andamento_2024_posti_auto;
-                    document.getElementById('compravenditeResidenziali').textContent = mercato.compravendite_residenziali_2024;
-                    document.getElementById('compravenditeNonResidenziali').textContent = mercato.compravendite_non_residenziali_2024;
-                    document.getElementById('compravenditePostiAuto').textContent = mercato.compravendite_posti_auto_2024;
                     document.getElementById('zonaCompravendite').textContent = mercato.zona_nome;
                     document.getElementById('posizioneZonaCompravendite').textContent = mercato.posizione_zona;
 
