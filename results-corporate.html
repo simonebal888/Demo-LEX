@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valutazione Corporate - Deloitte</title>
+    <title>DeepRiskRE - Valutazione Corporate</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -25,6 +25,8 @@
         .detail-label { font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
         .detail-value { font-size: 16px; font-weight: 600; color: #000; }
         .corp-badge { display: inline-block; background: #003d66; color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 12px; border-radius: 12px; margin-bottom: 12px; }
+        .form-card { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 30px; }
+        .button-group { display: flex; gap: 12px; }
         .main-tabs-container { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 30px; overflow: hidden; }
         .main-tabs-header { display: flex; border-bottom: 2px solid #e0e0e0; background-color: #f9f9f9; overflow-x: auto; }
         .main-tab-button { flex: 1; padding: 16px 20px; border: none; background: none; cursor: pointer; font-size: 16px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; border-bottom: 3px solid transparent; white-space: nowrap; min-width: 150px; }
@@ -51,6 +53,8 @@
         .btn { padding: 12px 28px; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: all 0.3s ease; font-family: inherit; }
         .btn-primary { background: linear-gradient(135deg, #86BC25 0%, #007CB0 100%); color: white; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(134,188,37,0.3); }
+        .btn-secondary { background-color: #e8e8e8; color: #333; }
+        .btn-secondary:hover { background-color: #d8d8d8; }
         #raggioSlider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: white; border: 3px solid #007CB0; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
         #raggioSlider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: white; border: 3px solid #007CB0; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
         @media (max-width: 768px) {
@@ -61,20 +65,54 @@
         table.corp-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
         table.corp-table th { background: #003d66; color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
         table.corp-table td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; }
-        table.corp-table tr:last-child td { font-weight: 700; background: #f0f7fb; }
+        table.corp-table tr.total-row td { font-weight: 700; background: #f0f7fb; }
         .benchmark-controls { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px; }
         .benchmark-field { flex: 1; min-width: 220px; }
         .benchmark-field label { display: block; font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
         .benchmark-field select { width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0; border-radius: 6px; font-size: 14px; font-family: inherit; background: white; cursor: pointer; }
         .benchmark-field select:focus { outline: none; border-color: #007CB0; }
         .profilo-attivo-tag { display: inline-block; background: #86BC25; color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px; margin-right: 8px; }
+        .fonte-nota { font-size: 11px; color: #888; font-style: italic; margin-top: -10px; margin-bottom: 20px; }
+        /* Modali */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 500px; width: 90%; text-align: center; }
+        .modal-icon { font-size: 48px; margin-bottom: 20px; }
+        .modal-title { font-size: 20px; font-weight: 600; color: #000; margin-bottom: 15px; }
+        .modal-message { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 30px; }
+        .modal-buttons { display: flex; gap: 12px; justify-content: center; }
+        .modal-buttons .btn { flex: 1; }
+        /* Chatbot */
+        .chatbot-fab { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #86BC25 0%, #007CB0 100%); color: white; border: none; font-size: 28px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.25); z-index: 1500; transition: transform 0.2s ease; }
+        .chatbot-fab:hover { transform: scale(1.08); }
+        .chatbot-panel { position: fixed; bottom: 100px; right: 24px; width: 380px; max-width: calc(100vw - 48px); height: 560px; max-height: calc(100vh - 130px); background: white; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,0.25); display: none; flex-direction: column; overflow: hidden; z-index: 1500; }
+        .chatbot-panel.show { display: flex; }
+        .chatbot-header { background: linear-gradient(135deg, #86BC25 0%, #007CB0 100%); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .chatbot-header-title { font-size: 15px; font-weight: 600; }
+        .chatbot-header-subtitle { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+        .chatbot-close { background: none; border: none; color: white; font-size: 22px; cursor: pointer; padding: 0; line-height: 1; opacity: 0.9; }
+        .chatbot-close:hover { opacity: 1; }
+        .chatbot-messages { flex: 1; padding: 16px; overflow-y: auto; background-color: #f8f9fa; }
+        .chatbot-msg { margin-bottom: 12px; display: flex; animation: fadeIn 0.3s ease; }
+        .chatbot-msg.bot { justify-content: flex-start; }
+        .chatbot-msg.user { justify-content: flex-end; }
+        .chatbot-msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5; }
+        .chatbot-msg.bot .chatbot-msg-bubble { background-color: white; color: #333; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .chatbot-msg.user .chatbot-msg-bubble { background: linear-gradient(135deg, #86BC25 0%, #007CB0 100%); color: white; border-bottom-right-radius: 4px; }
+        .chatbot-options { padding: 12px 16px 16px; border-top: 1px solid #e0e0e0; background: white; }
+        .chatbot-option-btn { display: block; width: 100%; padding: 10px 14px; margin-bottom: 8px; background: white; border: 1.5px solid #007CB0; color: #007CB0; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-align: left; font-family: inherit; }
+        .chatbot-option-btn:hover { background: #007CB0; color: white; }
+        .chatbot-option-btn.back { border-color: #999; color: #666; font-size: 12px; margin-top: 4px; }
+        .chatbot-option-btn.back:hover { background: #666; color: white; }
+        .doc-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background-color: #f9f9f9; border-left: 3px solid #86BC25; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; }
+        .doc-item:hover { background-color: #f0f0f0; }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-content">
-            <div class="header-title">Valutazione Corporate</div>
-            <div class="header-subtitle">Fabbricati strumentali, contenuto e continuità operativa d'impresa</div>
+            <div class="header-title">DeepRiskRE</div>
+            <div class="header-subtitle">Deep Risk Real Estate · Valutazione corporate, contenuto e continuità operativa</div>
         </div>
     </div>
  
@@ -98,6 +136,18 @@
             </div>
         </div>
  
+        <!-- Documenti catastali -->
+        <div class="form-card">
+            <div class="button-group">
+                <button type="button" class="btn btn-primary" id="downloadVisuraBtn">Richiedi Visura</button>
+                <button type="button" class="btn btn-primary" id="downloadPlanimetriaBtn">Richiedi Planimetria</button>
+            </div>
+            <div id="documentiScaricati" style="margin-top: 20px; display: none;">
+                <div style="font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Documenti scaricati</div>
+                <div id="listaDocumenti" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+        </div>
+ 
         <div class="main-tabs-container">
             <div class="main-tabs-header">
                 <button class="main-tab-button active" onclick="switchMainTab(event, 'main-immobile')">Fabbricato & Contenuto</button>
@@ -113,6 +163,7 @@
                         <button class="tab-button active" onclick="switchTab(event, 'tab-fabbricato')">Fabbricato</button>
                         <button class="tab-button" onclick="switchTab(event, 'tab-mercato')">Dinamica Mercato</button>
                         <button class="tab-button" onclick="switchTab(event, 'tab-valutazione')">Valutazione</button>
+                        <button class="tab-button" onclick="switchTab(event, 'tab-comparabili')">Comparabili</button>
                     </div>
  
                     <div id="tab-fabbricato" class="tab-content active">
@@ -181,6 +232,27 @@
                             <div class="data-card"><div class="data-card-label">Valore massimo</div><div class="data-card-value" id="valMax">-</div></div>
                         </div>
                     </div>
+ 
+                    <div id="tab-comparabili" class="tab-content">
+                        <div class="section-title">Compravendite Comparabili</div>
+                        <div style="background-color: #f0f7fb; border-left: 3px solid #007CB0; padding: 12px 16px; border-radius: 4px; margin-bottom: 20px; font-size: 13px; color: #333;">
+                            <strong>Area di ricerca:</strong> Via Dante Alighieri, Lucca · <strong>Raggio:</strong> 0,5 km · <strong>Periodo:</strong> Febbraio 2023 - Febbraio 2026 · <strong>Tipologia:</strong> Non residenziali
+                        </div>
+                        <table class="corp-table">
+                            <thead>
+                                <tr><th>Data</th><th>Ubicazione</th><th>Tipologia</th><th style="text-align:right;">Sup.</th><th style="text-align:right;">Prezzo</th><th style="text-align:right;">€/mq</th></tr>
+                            </thead>
+                            <tbody id="comparabiliTable"></tbody>
+                        </table>
+                        <div class="data-grid">
+                            <div class="data-card" style="border-left-color:#003d66;"><div class="data-card-label">Prezzo medio venduti</div><div class="data-card-value" id="compMedio" style="color:#003d66;">-</div></div>
+                            <div class="data-card"><div class="data-card-label">Scostamento da valutazione media</div><div class="data-card-value" id="compScostamento">-</div></div>
+                        </div>
+                        <div class="chart-container"><canvas id="chartComparabili"></canvas></div>
+                        <div class="info-box" style="font-size:12px; color:#666;">
+                            <p>I prezzi si riferiscono ad atti di compravendita per l'intera proprietà (100%). Il confronto tra prezzo medio dei venduti e valore di valutazione conferma la congruità della stima ai fini istruttori. Fonte: banche dati Agenzia delle Entrate - OMI, atti notarili registrati.</p>
+                        </div>
+                    </div>
                 </div>
  
                 <div class="tabs-container">
@@ -195,6 +267,7 @@
                             </thead>
                             <tbody id="contenutoTable"></tbody>
                         </table>
+                        <div class="fonte-nota">Fonte: questionario assuntivo compilato dall'impresa · ultima rilevazione 15 marzo 2023</div>
                         <div class="data-grid" style="margin-top: 20px;">
                             <div class="data-card" style="border-left-color:#86BC25;"><div class="data-card-label">Valore fabbricato</div><div class="data-card-value" id="riepFabbricato">-</div></div>
                             <div class="data-card" style="border-left-color:#FF9800;"><div class="data-card-label">Valore contenuto</div><div class="data-card-value" id="riepContenuto">-</div></div>
@@ -209,7 +282,6 @@
                         <div class="info-box">
                             <p>Confronto del valore di fabbricato e contenuto rispetto a profili d'impresa differenti. Il valore del contenuto dipende fortemente dalla <strong>densità di capitale per metro quadro</strong> del settore produttivo e dalla <strong>dimensione</strong> dell'impresa, mentre il valore del fabbricato resta legato prevalentemente alla superficie e alla localizzazione. Selezionare un profilo per simulare il riposizionamento.</p>
                         </div>
- 
                         <div class="benchmark-controls">
                             <div class="benchmark-field">
                                 <label for="selSettore">Settore produttivo</label>
@@ -231,17 +303,13 @@
                                 </select>
                             </div>
                         </div>
- 
                         <div id="profiloRealeNota" style="font-size: 12px; color: #666; margin-bottom: 20px;"></div>
- 
                         <div class="data-grid">
                             <div class="data-card" style="border-left-color:#86BC25;"><div class="data-card-label">Valore fabbricato (profilo)</div><div class="data-card-value" id="bmFabbricato">-</div></div>
                             <div class="data-card" style="border-left-color:#FF9800;"><div class="data-card-label">Valore contenuto (profilo)</div><div class="data-card-value" id="bmContenuto">-</div></div>
                             <div class="data-card" style="border-left-color:#003d66;"><div class="data-card-label">Valore assicurabile (profilo)</div><div class="data-card-value" id="bmTotale" style="color:#003d66;">-</div></div>
                         </div>
- 
                         <div style="margin-top: 10px; margin-bottom: 10px; font-size: 13px; color: #666;">Densità di capitale del profilo selezionato: <strong id="bmDensita">-</strong></div>
- 
                         <div class="chart-container" style="height: 340px;"><canvas id="chartBenchmark"></canvas></div>
                     </div>
                 </div>
@@ -303,9 +371,7 @@
             <div id="main-coperture" class="main-tab-content">
                 <div class="tabs-container">
                     <div class="section-title">Profilo di Rischio dell'Impresa</div>
-                    <div class="info-box">
-                        <p id="copertureProfilo">-</p>
-                    </div>
+                    <div class="info-box"><p id="copertureProfilo">-</p></div>
  
                     <div class="section-title">Proposta di Copertura Corporate</div>
                     <div class="info-box">
@@ -321,9 +387,7 @@
                     </div>
  
                     <div class="section-title">Profilo Coperture — Esposizione vs Copertura</div>
-                    <div class="info-box">
-                        <p>Il grafico confronta il <strong>profilo di esposizione al rischio</strong> dell'impresa con il <strong>livello di copertura</strong> della polizza proposta, sulle voci property e corporate.</p>
-                    </div>
+                    <div class="info-box"><p>Il grafico confronta il <strong>profilo di esposizione al rischio</strong> dell'impresa con il <strong>livello di copertura</strong> della polizza proposta, sulle voci property e corporate.</p></div>
                     <div class="chart-container" style="height: 450px;"><canvas id="chartCoperture"></canvas></div>
  
                     <div class="section-title" style="margin-top: 40px;">Premio Tecnico Indicativo</div>
@@ -332,94 +396,122 @@
                         <div class="data-card"><div class="data-card-label">Caricamento spese (30%)</div><div class="data-card-value" id="premioCaricamento">-</div></div>
                         <div class="data-card" style="border-left-color:#003d66;"><div class="data-card-label">Premio tecnico annuo</div><div class="data-card-value" id="premioTecnico" style="color:#003d66;">-</div></div>
                     </div>
-                    <div class="info-box" style="font-size:12px; color:#666;">
-                        <p>Il premio tecnico è calcolato come perdita attesa annua (EAL) maggiorata dei caricamenti per spese di gestione e acquisizione. Valore indicativo da sottoporre a validazione attuariale e a ispezione tecnica del rischio (risk engineering).</p>
-                    </div>
+                    <div class="info-box" style="font-size:12px; color:#666;"><p>Il premio tecnico è calcolato come perdita attesa annua (EAL) maggiorata dei caricamenti per spese di gestione e acquisizione. Valore indicativo da sottoporre a validazione attuariale e a ispezione tecnica del rischio (risk engineering).</p></div>
                 </div>
             </div>
+        </div>
+    </div>
+ 
+    <!-- CHATBOT -->
+    <button class="chatbot-fab" id="chatbotFab" title="Apri assistente virtuale">💬</button>
+    <div class="chatbot-panel" id="chatbotPanel">
+        <div class="chatbot-header">
+            <div>
+                <div class="chatbot-header-title">Assistente virtuale</div>
+                <div class="chatbot-header-subtitle">Property &amp; Business · DeepRiskRE</div>
+            </div>
+            <button class="chatbot-close" id="chatbotClose">✕</button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages"></div>
+        <div class="chatbot-options" id="chatbotOptions"></div>
+    </div>
+ 
+    <!-- MODALE CONFERMA -->
+    <div class="modal-overlay" id="downloadModal">
+        <div class="modal-content">
+            <div class="modal-icon" id="modalIcon">📄</div>
+            <div class="modal-title" id="modalTitle">Conferma Richiesta</div>
+            <div class="modal-message" id="modalMessage">Stai per richiedere il documento. Vuoi procedere?</div>
+            <div id="modalCostInfo" style="display:none; background-color:#fff3cd; border-left:4px solid #FBC02D; padding:14px 18px; border-radius:4px; margin-bottom:20px; text-align:left;">
+                <div style="font-size:13px; color:#856404; font-weight:600; margin-bottom:4px;">⚠ Costo del servizio</div>
+                <div style="font-size:13px; color:#333;">La richiesta della planimetria comporta un costo aggiuntivo di <strong>€ 1,35</strong> che sarà addebitato sull'account aziendale.</div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="cancelDownloadBtn">Annulla</button>
+                <button class="btn btn-primary" id="confirmDownloadBtn">Conferma e richiedi</button>
+            </div>
+        </div>
+    </div>
+ 
+    <!-- MODALE CARICAMENTO -->
+    <div class="modal-overlay" id="loadingModal">
+        <div class="modal-content" style="max-width:480px;">
+            <div style="font-size:48px; margin-bottom:20px;">⚙️</div>
+            <div class="modal-title" id="loadingTitle">Richiesta in corso</div>
+            <div id="loadingStatus" style="font-size:13px; color:#666; margin-bottom:24px; min-height:20px;">Connessione al service provider LEX...</div>
+            <div style="background-color:#e0e0e0; height:10px; border-radius:5px; overflow:hidden; margin-bottom:12px;">
+                <div id="loadingBar" style="background:linear-gradient(135deg, #86BC25 0%, #007CB0 100%); height:100%; width:0%; transition:width 0.3s ease;"></div>
+            </div>
+            <div style="font-size:11px; color:#999;" id="loadingPercent">0%</div>
+        </div>
+    </div>
+ 
+    <!-- MODALE VIEWER PDF -->
+    <div class="modal-overlay" id="pdfViewerModal" style="z-index: 2100;">
+        <div style="background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); width: 90%; max-width: 1000px; height: 90vh; display: flex; flex-direction: column; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: linear-gradient(135deg, #86BC25 0%, #007CB0 100%); color: white;">
+                <div>
+                    <div style="font-size: 16px; font-weight: 600;" id="pdfViewerTitle">Documento</div>
+                    <div style="font-size: 11px; opacity: 0.85; margin-top: 2px;" id="pdfViewerSubtitle">-</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <a id="pdfViewerDownload" href="#" download style="background: rgba(255,255,255,0.2); color: white; padding: 8px 14px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">⬇ Scarica</a>
+                    <button id="pdfViewerClose" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 8px; line-height: 1;">✕</button>
+                </div>
+            </div>
+            <iframe id="pdfViewerFrame" src="" style="flex: 1; border: none; width: 100%;"></iframe>
         </div>
     </div>
  
     <script>
         const fabbricatiData = {
             'C1': {
-                superficie_mq: 500,
-                destinazione: 'Produttiva',
-                struttura: 'Cemento armato',
-                copertura: 'Cemento armato',
-                altezza: '6/8 metri',
-                eta: '20-40 anni',
-                stato: 'Buono stato',
-                tipo_fabbricato: 'Capannone indipendente',
-                contesto: 'Area urbanizzata',
-                visibilita: 'Strada intermedia',
-                manovra: 'Normale',
-                urbanizzazione: 'Alto (165 fabbricati/kmq)',
-                zona: 'Montuolo, S. Angelo, Antraccoli',
-                posizione: 'Semiperiferia',
-                dinamica: 'Media',
-                quotazione_mq: 496,
-                andamento_commerciale: '+0,89% anno',
-                val_min: 226448,
-                val_med: 248219,
-                val_max: 269990,
-                prezzo_mq: 496,
+                superficie_mq: 500, destinazione: 'Produttiva', struttura: 'Cemento armato', copertura: 'Cemento armato',
+                altezza: '6/8 metri', eta: '20-40 anni', stato: 'Buono stato', tipo_fabbricato: 'Capannone indipendente',
+                contesto: 'Area urbanizzata', visibilita: 'Strada intermedia', manovra: 'Normale', urbanizzazione: 'Alto (165 fabbricati/kmq)',
+                zona: 'Montuolo, S. Angelo, Antraccoli', posizione: 'Semiperiferia', dinamica: 'Media', quotazione_mq: 496, andamento_commerciale: '+0,89% anno',
+                val_min: 226448, val_med: 248219, val_max: 269990, prezzo_mq: 496,
                 contenuto: [
                     { categoria: 'Macchinari produttivi', descrizione: 'Linea di tessitura, telai, orditoi', valore: 180000 },
                     { categoria: 'Impianti', descrizione: 'Impianto elettrico, HVAC, aria compressa', valore: 45000 },
                     { categoria: 'Attrezzature', descrizione: 'Muletti, scaffalature, banchi lavoro', valore: 28000 },
                     { categoria: 'Scorte e magazzino', descrizione: 'Materie prime e semilavorati', valore: 62000 }
                 ],
-                fatturato_annuo: 2400000,
-                margine_contribuzione_pct: 35,
-                dipendenti: 18,
-                periodo_indennizzo_mesi: 12,
-                pga_475: 0.175,
-                classe_pai_frane: 'P1',
-                classe_pai_alluvioni: 'P2',
-                pendenza: 3,
-                epoca_costruzione: '1981-1990',
-                tipologia_strutturale: 'ca',
-                profilo_settore: 'tessile',
-                profilo_dimensione: 'piccola'
+                comparabili: [
+                    { data: '2024-08', ubicazione: 'Viale Castruccio Castracani', tipologia: 'Negozio + Laboratorio', sup: 196, prezzo: 167000 },
+                    { data: '2023-04', ubicazione: 'Via di Tempagnano', tipologia: 'Ufficio', sup: 240, prezzo: 279344 },
+                    { data: '2023-07', ubicazione: 'Via Papa Giovanni XXIII', tipologia: 'Istituto di credito', sup: 241, prezzo: 280000 }
+                ],
+                fatturato_annuo: 2400000, margine_contribuzione_pct: 35, dipendenti: 18, periodo_indennizzo_mesi: 12,
+                pga_475: 0.175, classe_pai_frane: 'P1', classe_pai_alluvioni: 'P2', pendenza: 3,
+                epoca_costruzione: '1981-1990', tipologia_strutturale: 'ca',
+                profilo_settore: 'tessile', profilo_dimensione: 'piccola'
             }
         };
  
         const probAnnuaPAI = { 'P0': 0, 'P1': 1/300, 'P2': 1/100, 'P3': 1/50, 'P4': 1/30 };
         const vulnSismicaEpoca = {
-            'pre-1919': { muratura: 0.70, ca: 0.60, misto: 0.68 },
-            '1919-1945': { muratura: 0.60, ca: 0.55, misto: 0.58 },
-            '1946-1970': { muratura: 0.50, ca: 0.45, misto: 0.48 },
-            '1971-1980': { muratura: 0.40, ca: 0.35, misto: 0.38 },
-            '1981-1990': { muratura: 0.30, ca: 0.25, misto: 0.28 },
-            '1991-2000': { muratura: 0.22, ca: 0.18, misto: 0.20 },
-            '2001-2010': { muratura: 0.15, ca: 0.10, misto: 0.13 },
-            'post-2010': { muratura: 0.10, ca: 0.06, misto: 0.08 }
+            'pre-1919': { muratura: 0.70, ca: 0.60, misto: 0.68 }, '1919-1945': { muratura: 0.60, ca: 0.55, misto: 0.58 },
+            '1946-1970': { muratura: 0.50, ca: 0.45, misto: 0.48 }, '1971-1980': { muratura: 0.40, ca: 0.35, misto: 0.38 },
+            '1981-1990': { muratura: 0.30, ca: 0.25, misto: 0.28 }, '1991-2000': { muratura: 0.22, ca: 0.18, misto: 0.20 },
+            '2001-2010': { muratura: 0.15, ca: 0.10, misto: 0.13 }, 'post-2010': { muratura: 0.10, ca: 0.06, misto: 0.08 }
         };
         const damageRatioFrane = { 'P0': 0, 'P1': 0.05, 'P2': 0.15, 'P3': 0.35, 'P4': 0.60 };
         const damageRatioAlluvioni = { 'P0': 0, 'P1': 0.04, 'P2': 0.12, 'P3': 0.28, 'P4': 0.50 };
         const VITA_UTILE_ANNI = 50;
         const testoClassePAI = { 'P0': 'Assenti', 'P1': 'Moderata', 'P2': 'Media', 'P3': 'Elevata', 'P4': 'Molto Elevata' };
         function classificaSismicaDaPGA(pga) {
-            if (pga < 0.05) return 'Molto Bassa';
-            if (pga < 0.10) return 'Bassa';
-            if (pga < 0.15) return 'Media';
-            if (pga < 0.25) return 'Elevata';
-            return 'Molto Elevata';
+            if (pga < 0.05) return 'Molto Bassa'; if (pga < 0.10) return 'Bassa'; if (pga < 0.15) return 'Media';
+            if (pga < 0.25) return 'Elevata'; return 'Molto Elevata';
         }
- 
         const densitaContenutoSettore = {
-            tessile:         { densita: 630, label: 'Tessile / Abbigliamento' },
-            metalmeccanica:  { densita: 1250, label: 'Metalmeccanica' },
-            alimentare:      { densita: 980, label: 'Alimentare' },
-            logistica:       { densita: 320, label: 'Logistica / Magazzinaggio' },
-            chimica:         { densita: 1450, label: 'Chimica / Plastica' }
+            tessile: { densita: 630, label: 'Tessile / Abbigliamento' }, metalmeccanica: { densita: 1250, label: 'Metalmeccanica' },
+            alimentare: { densita: 980, label: 'Alimentare' }, logistica: { densita: 320, label: 'Logistica / Magazzinaggio' },
+            chimica: { densita: 1450, label: 'Chimica / Plastica' }
         };
         const fattoreDimensione = {
-            micro:   { fatt: 0.65, label: 'Micro (fino a 9 addetti)' },
-            piccola: { fatt: 1.00, label: 'Piccola (10-49 addetti)' },
-            media:   { fatt: 1.55, label: 'Media (50-249 addetti)' },
-            grande:  { fatt: 2.30, label: 'Grande (250+ addetti)' }
+            micro: { fatt: 0.65, label: 'Micro (fino a 9 addetti)' }, piccola: { fatt: 1.00, label: 'Piccola (10-49 addetti)' },
+            media: { fatt: 1.55, label: 'Media (50-249 addetti)' }, grande: { fatt: 2.30, label: 'Grande (250+ addetti)' }
         };
         const premioFabbricatoDimensione = { micro: 0.92, piccola: 1.00, media: 1.08, grande: 1.15 };
  
@@ -429,51 +521,36 @@
             return { meta: data, dati: fabbricatiData[id] || fabbricatiData['C1'] };
         }
  
-        let calcoloGlobale = null;
-        let chartBenchmark = null;
+        let calcoloGlobale = null, chartBenchmark = null;
  
         function calcolaIVECorporate(f) {
             const valFabbricato = f.val_med;
             const valContenuto = f.contenuto.reduce((s, c) => s + c.valore, 0);
             const valAssicurabile = valFabbricato + valContenuto;
- 
             const probSis = 1 / 475;
             const vulnStrut = vulnSismicaEpoca[f.epoca_costruzione][f.tipologia_strutturale];
             const pgaNorm = Math.min(f.pga_475 / 0.35, 1);
             const drSis = vulnStrut * pgaNorm;
-            const fAmpl = 4.5;
-            const ealSismico = valAssicurabile * probSis * drSis * fAmpl;
- 
+            const ealSismico = valAssicurabile * probSis * drSis * 4.5;
             const ealFrane = valAssicurabile * probAnnuaPAI[f.classe_pai_frane] * damageRatioFrane[f.classe_pai_frane];
             const ealAlluvioni = valAssicurabile * probAnnuaPAI[f.classe_pai_alluvioni] * damageRatioAlluvioni[f.classe_pai_alluvioni];
- 
             const margineAnnuo = f.fatturato_annuo * (f.margine_contribuzione_pct / 100);
             const margineGiornaliero = margineAnnuo / 365;
-            const giorniFermoSisma = 270;
-            const giorniFermoFrane = 120;
-            const giorniFermoAlluvioni = 90;
+            const giorniFermoSisma = 270, giorniFermoFrane = 120, giorniFermoAlluvioni = 90;
             const biSisma = margineGiornaliero * giorniFermoSisma * probSis * drSis;
             const biFrane = margineGiornaliero * giorniFermoFrane * probAnnuaPAI[f.classe_pai_frane] * damageRatioFrane[f.classe_pai_frane];
             const biAlluvioni = margineGiornaliero * giorniFermoAlluvioni * probAnnuaPAI[f.classe_pai_alluvioni] * damageRatioAlluvioni[f.classe_pai_alluvioni];
             const ealBI = biSisma + biFrane + biAlluvioni;
- 
             const ealTotaleAnnuo = ealSismico + ealFrane + ealAlluvioni + ealBI;
             const perdita50 = ealTotaleAnnuo * VITA_UTILE_ANNI;
             const ivePerc = (perdita50 / valAssicurabile) * 100;
- 
             return {
-                valFabbricato, valContenuto, valAssicurabile,
-                margineAnnuo, margineGiornaliero,
-                ealSismico, ealFrane, ealAlluvioni, ealBI, ealTotaleAnnuo,
-                perdita50, ivePerc,
-                espSismico: ealSismico * VITA_UTILE_ANNI,
-                espFrane: ealFrane * VITA_UTILE_ANNI,
-                espAlluvioni: ealAlluvioni * VITA_UTILE_ANNI,
-                espBI: ealBI * VITA_UTILE_ANNI,
-                classSismica: classificaSismicaDaPGA(f.pga_475),
-                classFrane: testoClassePAI[f.classe_pai_frane],
-                classAlluvioni: testoClassePAI[f.classe_pai_alluvioni],
-                giorniFermoSisma
+                valFabbricato, valContenuto, valAssicurabile, margineAnnuo, margineGiornaliero,
+                ealSismico, ealFrane, ealAlluvioni, ealBI, ealTotaleAnnuo, perdita50, ivePerc,
+                espSismico: ealSismico * VITA_UTILE_ANNI, espFrane: ealFrane * VITA_UTILE_ANNI,
+                espAlluvioni: ealAlluvioni * VITA_UTILE_ANNI, espBI: ealBI * VITA_UTILE_ANNI,
+                classSismica: classificaSismicaDaPGA(f.pga_475), classFrane: testoClassePAI[f.classe_pai_frane],
+                classAlluvioni: testoClassePAI[f.classe_pai_alluvioni], giorniFermoSisma
             };
         }
  
@@ -504,11 +581,8 @@
             cerchioRaggio.setRadius(raggioKm * 1000);
             mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20,20] });
         }
- 
         function ricalcolaCompravendite(raggioKm) {
-            const base = 18;
-            const fattoreArea = Math.pow(raggioKm / 2, 1.6);
-            document.getElementById('mktCompravendite').textContent = Math.round(base * fattoreArea);
+            document.getElementById('mktCompravendite').textContent = Math.round(18 * Math.pow(raggioKm / 2, 1.6));
         }
  
         function calcolaBenchmark(f, settore, dimensione) {
@@ -516,12 +590,7 @@
             const fattDim = fattoreDimensione[dimensione].fatt;
             const valContenuto = f.superficie_mq * dens * fattDim;
             const valFabbricato = f.val_med * premioFabbricatoDimensione[dimensione];
-            return {
-                valContenuto: Math.round(valContenuto),
-                valFabbricato: Math.round(valFabbricato),
-                valTotale: Math.round(valContenuto + valFabbricato),
-                densitaEffettiva: Math.round(dens * fattDim)
-            };
+            return { valContenuto: Math.round(valContenuto), valFabbricato: Math.round(valFabbricato), valTotale: Math.round(valContenuto + valFabbricato), densitaEffettiva: Math.round(dens * fattDim) };
         }
  
         function aggiornaBenchmark() {
@@ -529,12 +598,10 @@
             const settore = document.getElementById('selSettore').value;
             const dimensione = document.getElementById('selDimensione').value;
             const bm = calcolaBenchmark(f, settore, dimensione);
- 
             document.getElementById('bmFabbricato').textContent = fmtE(bm.valFabbricato);
             document.getElementById('bmContenuto').textContent = fmtE(bm.valContenuto);
             document.getElementById('bmTotale').textContent = fmtE(bm.valTotale);
             document.getElementById('bmDensita').textContent = `€ ${bm.densitaEffettiva.toLocaleString('it-IT')} / mq`;
- 
             const isReale = (settore === f.profilo_settore && dimensione === f.profilo_dimensione);
             const nota = document.getElementById('profiloRealeNota');
             if (isReale) {
@@ -542,37 +609,23 @@
             } else {
                 nota.innerHTML = `Profilo simulato: <strong>${densitaContenutoSettore[settore].label}</strong> · <strong>${fattoreDimensione[dimensione].label}</strong>. Profilo reale dell'impresa: Tessile, Piccola.`;
             }
- 
             const valContenutoReale = f.contenuto.reduce((s,c) => s + c.valore, 0);
             const ctx = document.getElementById('chartBenchmark').getContext('2d');
             if (chartBenchmark) chartBenchmark.destroy();
             chartBenchmark = new Chart(ctx, {
                 type: 'bar',
-                data: {
-                    labels: ['Valore Fabbricato', 'Valore Contenuto', 'Valore Assicurabile'],
-                    datasets: [
-                        { label: 'Manifatture Toscane (reale)', data: [f.val_med, valContenutoReale, f.val_med + valContenutoReale], backgroundColor: '#86BC25' },
-                        { label: 'Profilo selezionato', data: [bm.valFabbricato, bm.valContenuto, bm.valTotale], backgroundColor: '#007CB0' }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } },
-                        tooltip: { callbacks: { label: (c) => c.dataset.label + ': € ' + c.parsed.y.toLocaleString('it-IT') } } },
-                    scales: { y: { beginAtZero: true, ticks: { callback: (v) => '€ ' + (v/1000) + 'k' } } }
-                }
+                data: { labels: ['Valore Fabbricato', 'Valore Contenuto', 'Valore Assicurabile'], datasets: [
+                    { label: 'Manifatture Toscane (reale)', data: [f.val_med, valContenutoReale, f.val_med + valContenutoReale], backgroundColor: '#86BC25' },
+                    { label: 'Profilo selezionato', data: [bm.valFabbricato, bm.valContenuto, bm.valTotale], backgroundColor: '#007CB0' }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } }, tooltip: { callbacks: { label: (c) => c.dataset.label + ': € ' + c.parsed.y.toLocaleString('it-IT') } } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => '€ ' + (v/1000) + 'k' } } } }
             });
         }
  
         function createCopertureRadar(calc) {
             const labels = ['Incendio fabbricato', 'Incendio contenuto', 'Guasti macchine', 'Business Interruption', 'Terremoto', 'Alluvioni', 'RC prodotti', 'Furto'];
-            const mappaEsp = (cl) => {
-                const m = { 'Assenti': 10, 'Molto Bassa': 10, 'Bassa': 30, 'Moderata': 35, 'Media': 55, 'Elevata': 75, 'Molto Elevata': 95 };
-                return m[cl] !== undefined ? m[cl] : 50;
-            };
-            const espSis = mappaEsp(calc.classSismica);
-            const espAll = mappaEsp(calc.classAlluvioni);
-            const esposizione = [70, 75, 65, 80, espSis, espAll, 50, 45];
+            const mappaEsp = (cl) => ({ 'Assenti': 10, 'Molto Bassa': 10, 'Bassa': 30, 'Moderata': 35, 'Media': 55, 'Elevata': 75, 'Molto Elevata': 95 }[cl] || 50);
+            const esposizione = [70, 75, 65, 80, mappaEsp(calc.classSismica), mappaEsp(calc.classAlluvioni), 50, 45];
             const copertura = [90, 85, 80, 85, 65, 55, 70, 60];
             const ctx = document.getElementById('chartCoperture').getContext('2d');
             new Chart(ctx, {
@@ -591,6 +644,24 @@
                 type: 'bar',
                 data: { labels: ['Valore Minimo', 'Valore Medio', 'Valore Massimo'], datasets: [{ label: 'Valutazione fabbricato (€)', data: [f.val_min, f.val_med, f.val_max], backgroundColor: ['#e8f4f8', '#86BC25', '#007CB0'], borderColor: ['#007CB0', '#86BC25', '#007CB0'], borderWidth: 2 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } }
+            });
+        }
+ 
+        function createComparabiliChart(f, prezzoMedio) {
+            const ctx = document.getElementById('chartComparabili').getContext('2d');
+            const labels = f.comparabili.map((c, i) => 'Comp. ' + (i+1));
+            new Chart(ctx, {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ label: 'Prezzo di compravendita (€)', data: f.comparabili.map(c => c.prezzo), backgroundColor: '#007CB0' }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true },
+                        annotation: false,
+                        tooltip: { callbacks: { label: (c) => '€ ' + c.parsed.y.toLocaleString('it-IT') } }
+                    },
+                    scales: { y: { beginAtZero: true, ticks: { callback: (v) => '€ ' + (v/1000) + 'k' } } }
+                }
             });
         }
  
@@ -634,12 +705,28 @@
             document.getElementById('valMax').textContent = fmtE(f.val_max);
             createValutazioneChart(f);
  
+            // Comparabili
+            const compBody = document.getElementById('comparabiliTable');
+            compBody.innerHTML = '';
+            let sommaPrezzi = 0, sommaSup = 0;
+            f.comparabili.forEach(c => {
+                const euroMq = Math.round(c.prezzo / c.sup);
+                sommaPrezzi += c.prezzo; sommaSup += c.sup;
+                compBody.innerHTML += `<tr><td>${c.data}</td><td>${c.ubicazione}</td><td>${c.tipologia}</td><td style="text-align:right;">${c.sup} m²</td><td style="text-align:right;">${fmtE(c.prezzo)}</td><td style="text-align:right;">€ ${euroMq.toLocaleString('it-IT')}</td></tr>`;
+            });
+            const prezzoMedio = Math.round(sommaPrezzi / f.comparabili.length);
+            document.getElementById('compMedio').textContent = fmtE(prezzoMedio);
+            const scost = ((prezzoMedio - f.val_med) / f.val_med * 100);
+            document.getElementById('compScostamento').textContent = (scost >= 0 ? '+' : '') + scost.toFixed(1) + '%';
+            createComparabiliChart(f, prezzoMedio);
+ 
+            // Contenuto
             const tbody = document.getElementById('contenutoTable');
             tbody.innerHTML = '';
             f.contenuto.forEach(c => {
                 tbody.innerHTML += `<tr><td><strong>${c.categoria}</strong></td><td>${c.descrizione}</td><td style="text-align:right;">${fmtE(c.valore)}</td></tr>`;
             });
-            tbody.innerHTML += `<tr><td colspan="2">Totale contenuto aziendale</td><td style="text-align:right;">${fmtE(calc.valContenuto)}</td></tr>`;
+            tbody.innerHTML += `<tr class="total-row"><td colspan="2">Totale contenuto aziendale</td><td style="text-align:right;">${fmtE(calc.valContenuto)}</td></tr>`;
             document.getElementById('riepFabbricato').textContent = fmtE(calc.valFabbricato);
             document.getElementById('riepContenuto').textContent = fmtE(calc.valContenuto);
             document.getElementById('riepTotale').textContent = fmtE(calc.valAssicurabile);
@@ -661,21 +748,18 @@
             document.getElementById('rBI').textContent = `${f.periodo_indennizzo_mesi} mesi indennizzo`;
             document.getElementById('rBIVal').textContent = fmtE(calc.espBI);
  
-            const biBody = document.getElementById('biTable');
-            biBody.innerHTML = `
+            document.getElementById('biTable').innerHTML = `
                 <tr><td>Fatturato annuo</td><td style="text-align:right;">${fmtE(f.fatturato_annuo)}</td></tr>
                 <tr><td>Margine di contribuzione (${f.margine_contribuzione_pct}%)</td><td style="text-align:right;">${fmtE(calc.margineAnnuo)}</td></tr>
                 <tr><td>Margine giornaliero</td><td style="text-align:right;">${fmtE(calc.margineGiornaliero)}</td></tr>
                 <tr><td>Giorni fermo stimati (sisma grave)</td><td style="text-align:right;">${calc.giorniFermoSisma} giorni</td></tr>
                 <tr><td>Periodo massimo di indennizzo</td><td style="text-align:right;">${f.periodo_indennizzo_mesi} mesi</td></tr>
-                <tr><td>EAL Business Interruption (annuo)</td><td style="text-align:right;">${fmtE(calc.ealBI)}</td></tr>
+                <tr class="total-row"><td>EAL Business Interruption (annuo)</td><td style="text-align:right;">${fmtE(calc.ealBI)}</td></tr>
             `;
  
             const contributi = [
-                { nome: 'sismico', val: calc.ealSismico },
-                { nome: 'business interruption', val: calc.ealBI },
-                { nome: 'alluvioni', val: calc.ealAlluvioni },
-                { nome: 'frane', val: calc.ealFrane }
+                { nome: 'sismico', val: calc.ealSismico }, { nome: 'business interruption', val: calc.ealBI },
+                { nome: 'alluvioni', val: calc.ealAlluvioni }, { nome: 'frane', val: calc.ealFrane }
             ].sort((a,b) => b.val - a.val);
             document.getElementById('iveMetodologia').textContent = "L'IVE-C estende il modello Expected Annual Loss al contesto d'impresa. La perdita attesa è calcolata su fabbricato e contenuto (macchinari, impianti, scorte) per i rischi catastrofali, integrando la componente di Business Interruption che quantifica il mancato margine durante il fermo attività. Fonti: INGV MPS04 (sismica), ISPRA-PAI (frane e alluvioni), dati economici d'impresa per la continuità operativa.";
             document.getElementById('iveContributi').textContent = `L'IVE-C pari a circa ${calc.ivePerc.toFixed(1)}% del valore assicurabile (€ ${Math.round(calc.valAssicurabile).toLocaleString('it-IT')}) corrisponde a una perdita cumulata attesa di ${fmtE(calc.perdita50)} su 50 anni, equivalente a un EAL annuo di ${fmtE(calc.ealTotaleAnnuo)}. La componente dominante è il rischio ${contributi[0].nome} (${fmtE(contributi[0].val)}/anno), seguito da ${contributi[1].nome} (${fmtE(contributi[1].val)}/anno). La Business Interruption rappresenta una quota rilevante dell'esposizione totale, tipica delle realtà produttive in cui il fermo dell'attività genera perdite economiche superiori al danno materiale.`;
@@ -685,11 +769,9 @@
  
             const premioPuro = calc.ealTotaleAnnuo;
             const caricamento = premioPuro * 0.30;
-            const premioTecnico = premioPuro + caricamento;
             document.getElementById('premioPuro').textContent = fmtE(premioPuro);
             document.getElementById('premioCaricamento').textContent = fmtE(caricamento);
-            document.getElementById('premioTecnico').textContent = fmtE(premioTecnico);
- 
+            document.getElementById('premioTecnico').textContent = fmtE(premioPuro + caricamento);
             createCopertureRadar(calc);
  
             inizializzaMappa();
@@ -713,12 +795,8 @@
             document.querySelectorAll('.main-tab-button').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             event.target.classList.add('active');
- 
             if (tabId === 'main-immobile' && mappaLeaflet) {
-                setTimeout(() => {
-                    mappaLeaflet.invalidateSize();
-                    if (cerchioRaggio) mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20, 20] });
-                }, 100);
+                setTimeout(() => { mappaLeaflet.invalidateSize(); if (cerchioRaggio) mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20, 20] }); }, 100);
             }
         }
         function switchTab(event, tabId) {
@@ -728,14 +806,274 @@
             event.target.parentElement.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             event.target.classList.add('active');
- 
             if (tabId === 'tab-mercato' && mappaLeaflet) {
-                setTimeout(() => {
-                    mappaLeaflet.invalidateSize();
-                    if (cerchioRaggio) mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20, 20] });
-                }, 100);
+                setTimeout(() => { mappaLeaflet.invalidateSize(); if (cerchioRaggio) mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20, 20] }); }, 100);
             }
         }
+ 
+        // ========== DOCUMENTI CATASTALI ==========
+        const modal = document.getElementById('downloadModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalIcon = document.getElementById('modalIcon');
+        const modalCostInfo = document.getElementById('modalCostInfo');
+        const cancelBtn = document.getElementById('cancelDownloadBtn');
+        const confirmBtn = document.getElementById('confirmDownloadBtn');
+        const loadingModal = document.getElementById('loadingModal');
+        const loadingTitle = document.getElementById('loadingTitle');
+        const loadingStatus = document.getElementById('loadingStatus');
+        const loadingBar = document.getElementById('loadingBar');
+        const loadingPercent = document.getElementById('loadingPercent');
+        let currentDownloadType = '';
+ 
+        document.getElementById('downloadVisuraBtn').addEventListener('click', () => {
+            modalIcon.textContent = '📄';
+            modalTitle.innerText = 'Richiedi Visura Catastale';
+            modalMessage.innerHTML = 'Stai per richiedere la <strong>visura catastale aggiornata</strong> del fabbricato strumentale. Confermi la richiesta?';
+            modalCostInfo.style.display = 'none';
+            confirmBtn.textContent = 'Conferma e richiedi';
+            currentDownloadType = 'visura';
+            modal.classList.add('show');
+        });
+        document.getElementById('downloadPlanimetriaBtn').addEventListener('click', () => {
+            modalIcon.textContent = '📐';
+            modalTitle.innerText = 'Richiedi Planimetria Catastale';
+            modalMessage.innerHTML = 'Stai per richiedere la <strong>planimetria catastale</strong> del fabbricato strumentale.';
+            modalCostInfo.style.display = 'block';
+            confirmBtn.textContent = 'Conferma e procedi';
+            currentDownloadType = 'planimetria';
+            modal.classList.add('show');
+        });
+        cancelBtn.addEventListener('click', () => modal.classList.remove('show'));
+        confirmBtn.addEventListener('click', () => { modal.classList.remove('show'); avviaCaricamento(currentDownloadType); });
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('show'); });
+ 
+        function aggiungiDocumentoScaricato(tipo, fileUrl, fileName) {
+            const container = document.getElementById('documentiScaricati');
+            const lista = document.getElementById('listaDocumenti');
+            const idLink = 'linkDoc-' + tipo;
+            if (document.getElementById(idLink)) return;
+            const label = tipo === 'planimetria' ? 'Planimetria Catastale' : 'Visura Catastale';
+            const icona = tipo === 'planimetria' ? '📐' : '📄';
+            const dataOra = new Date().toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const item = document.createElement('div');
+            item.id = idLink;
+            item.className = 'doc-item';
+            item.onclick = () => apriPdfViewer(fileUrl, fileName, label);
+            item.innerHTML = `<span style="font-size: 24px;">${icona}</span><div style="flex: 1;"><div style="font-size: 14px; font-weight: 600; color: #007CB0;">${label}</div><div style="font-size: 11px; color: #666; margin-top: 2px;">Scaricata il ${dataOra} · clicca per visualizzare</div></div><span style="font-size: 18px; color: #86BC25;">👁</span>`;
+            lista.appendChild(item);
+            container.style.display = 'block';
+        }
+        function apriPdfViewer(fileUrl, fileName, label) {
+            document.getElementById('pdfViewerTitle').textContent = label;
+            document.getElementById('pdfViewerSubtitle').textContent = fileName;
+            document.getElementById('pdfViewerFrame').src = fileUrl;
+            const dl = document.getElementById('pdfViewerDownload');
+            dl.href = fileUrl; dl.download = fileName;
+            document.getElementById('pdfViewerModal').classList.add('show');
+        }
+        document.getElementById('pdfViewerClose').addEventListener('click', () => {
+            document.getElementById('pdfViewerModal').classList.remove('show');
+            document.getElementById('pdfViewerFrame').src = '';
+        });
+        document.getElementById('pdfViewerModal').addEventListener('click', (e) => {
+            if (e.target.id === 'pdfViewerModal') { document.getElementById('pdfViewerModal').classList.remove('show'); document.getElementById('pdfViewerFrame').src = ''; }
+        });
+ 
+        function avviaCaricamento(tipo) {
+            const fileUrl = tipo === 'planimetria' ? 'planimetria-corporate.pdf' : 'visura-corporate.pdf';
+            const fileName = fileUrl;
+            const docLabel = tipo === 'planimetria' ? 'planimetria' : 'visura';
+            loadingTitle.textContent = `Richiesta ${docLabel} in corso`;
+            loadingBar.style.width = '0%'; loadingPercent.textContent = '0%';
+            loadingStatus.textContent = 'Connessione al service provider LEX...';
+            loadingModal.classList.add('show');
+            const steps = [
+                { pct: 15, status: 'Connessione al service provider LEX...', delay: 600 },
+                { pct: 35, status: 'Autenticazione e validazione richiesta...', delay: 700 },
+                { pct: 60, status: `Recupero ${docLabel} dal Catasto...`, delay: 900 },
+                { pct: 85, status: 'Elaborazione documento...', delay: 700 },
+                { pct: 100, status: 'Download completato', delay: 500 }
+            ];
+            let i = 0;
+            function next() {
+                if (i >= steps.length) {
+                    const link = document.createElement('a');
+                    link.href = fileUrl; link.download = fileName;
+                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                    aggiungiDocumentoScaricato(tipo, fileUrl, fileName);
+                    setTimeout(() => loadingModal.classList.remove('show'), 600);
+                    return;
+                }
+                const s = steps[i];
+                loadingBar.style.width = s.pct + '%'; loadingPercent.textContent = s.pct + '%'; loadingStatus.textContent = s.status;
+                i++; setTimeout(next, s.delay);
+            }
+            next();
+        }
+ 
+        // ========== CHATBOT UNDERWRITING CORPORATE ==========
+        const chatbotState = { step: 0, history: [], scelte: { linea: null, indennizzo: null } };
+        const moltiplicatoriLinea = { 'Property Base': 1.0, 'Property + BI': 1.5, 'All Risks': 2.0 };
+        const moltiplicatoriIndennizzo = { '6 mesi': 1.0, '12 mesi': 1.25, '18 mesi': 1.45 };
+ 
+        function calcolaPremioCorporate() {
+            const calc = calcoloGlobale;
+            const ml = moltiplicatoriLinea[chatbotState.scelte.linea] || 1.0;
+            const mi = moltiplicatoriIndennizzo[chatbotState.scelte.indennizzo] || 1.0;
+            const premioPuro = calc.ealTotaleAnnuo;
+            const premioTecnico = premioPuro * ml * mi * 1.30;
+            return {
+                valAssicurabile: calc.valAssicurabile, ivePerc: calc.ivePerc,
+                premioPuro: Math.round(premioPuro), premioTecnico: Math.round(premioTecnico),
+                ealBI: Math.round(calc.ealBI)
+            };
+        }
+        function verificaAccettabilitaCorporate() {
+            const calc = calcoloGlobale;
+            const checks = [];
+            if (calc.ivePerc > 35) checks.push({ stato: 'warn', testo: `IVE-C elevato (${calc.ivePerc.toFixed(1)}%) — approvazione tecnica richiesta` });
+            else checks.push({ stato: 'ok', testo: `IVE-C entro soglia (${calc.ivePerc.toFixed(1)}%)` });
+            if (['Elevata', 'Molto Elevata'].includes(calc.classSismica)) checks.push({ stato: 'warn', testo: `Rischio sismico ${calc.classSismica} — franchigia catastrofale maggiorata` });
+            else checks.push({ stato: 'ok', testo: `Rischio sismico ${calc.classSismica}` });
+            if (['Media', 'Elevata', 'Molto Elevata'].includes(calc.classAlluvioni)) checks.push({ stato: 'warn', testo: `Pericolosità alluvioni ${calc.classAlluvioni} — sublimite consigliato` });
+            else checks.push({ stato: 'ok', testo: `Pericolosità alluvioni ${calc.classAlluvioni}` });
+            checks.push({ stato: 'ok', testo: `Continuità operativa valutata (EAL BI € ${Math.round(calc.ealBI).toLocaleString('it-IT')}/anno)` });
+            return checks;
+        }
+        function generaNumeroPratica() { return `${new Date().getFullYear()}-CORP-${Math.floor(1000 + Math.random() * 9000)}`; }
+ 
+        function chatbotAddMsg(testo, mittente) {
+            const msgs = document.getElementById('chatbotMessages');
+            const div = document.createElement('div');
+            div.className = 'chatbot-msg ' + mittente;
+            div.innerHTML = `<div class="chatbot-msg-bubble">${testo}</div>`;
+            msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+        }
+        function chatbotSetOptions(opzioni, mostraIndietro) {
+            const cont = document.getElementById('chatbotOptions');
+            cont.innerHTML = '';
+            opzioni.forEach(op => {
+                const btn = document.createElement('button');
+                btn.className = 'chatbot-option-btn';
+                btn.textContent = op.label;
+                btn.onclick = () => { chatbotAddMsg(op.label, 'user'); chatbotState.history.push({ step: chatbotState.step, scelte: {...chatbotState.scelte} }); op.action(); };
+                cont.appendChild(btn);
+            });
+            if (mostraIndietro && chatbotState.history.length > 0) {
+                const back = document.createElement('button');
+                back.className = 'chatbot-option-btn back';
+                back.textContent = '← Torna indietro';
+                back.onclick = () => {
+                    const prev = chatbotState.history.pop();
+                    chatbotState.step = prev.step; chatbotState.scelte = prev.scelte;
+                    const msgs = document.getElementById('chatbotMessages');
+                    msgs.removeChild(msgs.lastChild); msgs.removeChild(msgs.lastChild);
+                    chatbotRender();
+                };
+                cont.appendChild(back);
+            }
+        }
+        function chatbotRender() {
+            switch (chatbotState.step) {
+                case 0:
+                    chatbotAddMsg("Salve, sono il Suo assistente per la sottoscrizione corporate. Posso supportarLa nella valutazione assicurativa di questo fabbricato strumentale. Su cosa vuole lavorare?", 'bot');
+                    chatbotSetOptions([
+                        { label: 'Calcolo premio di sottoscrizione', action: () => { chatbotState.step = 10; chatbotRender(); } },
+                        { label: 'Verifica accettabilità rischio', action: () => { chatbotState.step = 20; chatbotRender(); } },
+                        { label: 'Genera proposta di copertura', action: () => { chatbotState.step = 30; chatbotRender(); } },
+                        { label: 'Analisi Business Interruption', action: () => { chatbotState.step = 40; chatbotRender(); } }
+                    ], false);
+                    break;
+                case 10:
+                    chatbotAddMsg("Quale linea di prodotto vuole quotare?<br><br><strong>Property Base</strong>: incendio fabbricato e contenuto<br><strong>Property + BI</strong>: aggiunge la continuità operativa<br><strong>All Risks</strong>: copertura completa con guasti macchine e RC", 'bot');
+                    chatbotSetOptions([
+                        { label: 'Property Base', action: () => { chatbotState.scelte.linea = 'Property Base'; chatbotState.step = 11; chatbotRender(); } },
+                        { label: 'Property + BI', action: () => { chatbotState.scelte.linea = 'Property + BI'; chatbotState.step = 11; chatbotRender(); } },
+                        { label: 'All Risks', action: () => { chatbotState.scelte.linea = 'All Risks'; chatbotState.step = 11; chatbotRender(); } }
+                    ], true);
+                    break;
+                case 11:
+                    chatbotAddMsg("Quale periodo di indennizzo Business Interruption desidera impostare?", 'bot');
+                    chatbotSetOptions([
+                        { label: '6 mesi', action: () => { chatbotState.scelte.indennizzo = '6 mesi'; chatbotState.step = 12; chatbotRender(); } },
+                        { label: '12 mesi', action: () => { chatbotState.scelte.indennizzo = '12 mesi'; chatbotState.step = 12; chatbotRender(); } },
+                        { label: '18 mesi', action: () => { chatbotState.scelte.indennizzo = '18 mesi'; chatbotState.step = 12; chatbotRender(); } }
+                    ], true);
+                    break;
+                case 12:
+                    const calc = calcolaPremioCorporate();
+                    chatbotAddMsg(`<strong>Riepilogo tecnico di sottoscrizione</strong><br><br>• Linea prodotto: ${chatbotState.scelte.linea}<br>• Indennizzo BI: ${chatbotState.scelte.indennizzo}<br>• Valore assicurabile: € ${calc.valAssicurabile.toLocaleString('it-IT')}<br>• Indice IVE-C: ${calc.ivePerc.toFixed(1)}%<br>• Premio puro (EAL): € ${calc.premioPuro.toLocaleString('it-IT')}<br><br><strong>Premio tecnico annuo: € ${calc.premioTecnico.toLocaleString('it-IT')}</strong><br><span style="font-size: 11px; color: #666;">Valore indicativo da sottoporre a validazione attuariale e risk engineering.</span>`, 'bot');
+                    chatbotSetOptions([
+                        { label: 'Esporta proposta', action: () => { chatbotState.step = 13; chatbotRender(); } },
+                        { label: 'Sottoponi a revisione tecnica', action: () => { chatbotState.step = 14; chatbotRender(); } },
+                        { label: 'Modifica parametri', action: () => { chatbotState.history.pop(); chatbotState.history.pop(); chatbotState.step = 10; const m = document.getElementById('chatbotMessages'); m.removeChild(m.lastChild); m.removeChild(m.lastChild); chatbotRender(); } }
+                    ], true);
+                    break;
+                case 13:
+                    chatbotAddMsg(`Proposta esportata in formato PDF.<br>File: <em>proposta_${generaNumeroPratica()}.pdf</em><br><br>Documento disponibile nella sezione "Proposte in lavorazione" del gestionale corporate.`, 'bot');
+                    chatbotSetOptions([{ label: 'Nuova operazione', action: () => chatbotReset() }], false);
+                    break;
+                case 14:
+                    chatbotAddMsg(`Pratica inoltrata al team tecnico corporate.<br>Riferimento: <strong>${generaNumeroPratica()}</strong><br><br>Riceverà notifica nel cruscotto al completamento della validazione.`, 'bot');
+                    chatbotSetOptions([{ label: 'Nuova operazione', action: () => chatbotReset() }], false);
+                    break;
+                case 20:
+                    const checks = verificaAccettabilitaCorporate();
+                    const icone = { 'ok': '✓', 'warn': '⚠', 'critical': '✗' };
+                    const colori = { 'ok': '#86BC25', 'warn': '#FF9800', 'critical': '#D32F2F' };
+                    let html = '<strong>Checklist di accettabilità</strong><br><br>';
+                    checks.forEach(c => { html += `<div style="margin-bottom: 8px;"><span style="color: ${colori[c.stato]}; font-weight: 700;">${icone[c.stato]}</span> ${c.testo}</div>`; });
+                    const hasWarn = checks.some(c => c.stato === 'warn');
+                    html += hasWarn ? '<br><span style="color: #FF9800; font-weight: 600;">Esito: rischio accettabile con condizioni particolari.</span>' : '<br><span style="color: #86BC25; font-weight: 600;">Esito: rischio pienamente accettabile.</span>';
+                    chatbotAddMsg(html, 'bot');
+                    chatbotSetOptions([
+                        { label: 'Procedi con quotazione', action: () => { chatbotState.step = 10; chatbotRender(); } },
+                        { label: 'Apri pratica di referral', action: () => { chatbotState.step = 21; chatbotRender(); } },
+                        { label: 'Torna al menu principale', action: () => chatbotReset() }
+                    ], true);
+                    break;
+                case 21:
+                    chatbotAddMsg(`Pratica di referral aperta verso il sottoscrittore senior.<br>Riferimento: <strong>${generaNumeroPratica()}</strong><br><br>Il caso è stato preso in carico.`, 'bot');
+                    chatbotSetOptions([{ label: 'Nuova operazione', action: () => chatbotReset() }], false);
+                    break;
+                case 30:
+                    chatbotAddMsg("La proposta sarà generata in base al profilo di rischio del fabbricato, del contenuto e della continuità operativa. Conferma di voler procedere?", 'bot');
+                    chatbotSetOptions([
+                        { label: 'Genera PDF proposta', action: () => { chatbotState.step = 31; chatbotRender(); } },
+                        { label: 'Apri pratica nel gestionale', action: () => { chatbotState.step = 32; chatbotRender(); } },
+                        { label: 'Torna al menu principale', action: () => chatbotReset() }
+                    ], true);
+                    break;
+                case 31:
+                    chatbotAddMsg(`PDF proposta generato.<br>File: <em>proposta_${generaNumeroPratica()}.pdf</em><br><br>Documento pronto per invio all'impresa o salvataggio nella pratica.`, 'bot');
+                    chatbotSetOptions([{ label: 'Nuova operazione', action: () => chatbotReset() }], false);
+                    break;
+                case 32:
+                    chatbotAddMsg(`Pratica <strong>${generaNumeroPratica()}</strong> aperta nel gestionale PropertySys Corporate.<br><br>Stato iniziale: <em>in lavorazione</em>.`, 'bot');
+                    chatbotSetOptions([{ label: 'Nuova operazione', action: () => chatbotReset() }], false);
+                    break;
+                case 40:
+                    const c = calcoloGlobale;
+                    chatbotAddMsg(`<strong>Analisi Business Interruption</strong><br><br>L'interruzione dell'attività rappresenta una delle esposizioni più rilevanti per l'impresa.<br><br>• Margine giornaliero: € ${Math.round(c.margineGiornaliero).toLocaleString('it-IT')}<br>• Fermo stimato sisma grave: ${c.giorniFermoSisma} giorni<br>• Perdita potenziale per fermo prolungato: € ${Math.round(c.margineGiornaliero * c.giorniFermoSisma).toLocaleString('it-IT')}<br>• EAL Business Interruption: € ${Math.round(c.ealBI).toLocaleString('it-IT')}/anno<br><br>Si raccomanda un periodo di indennizzo di almeno 12 mesi per coprire i tempi reali di ripristino della capacità produttiva.`, 'bot');
+                    chatbotSetOptions([
+                        { label: 'Quota con copertura BI', action: () => { chatbotState.scelte.linea = 'Property + BI'; chatbotState.step = 11; chatbotRender(); } },
+                        { label: 'Torna al menu principale', action: () => chatbotReset() }
+                    ], true);
+                    break;
+            }
+        }
+        function chatbotReset() {
+            chatbotState.step = 0; chatbotState.history = []; chatbotState.scelte = { linea: null, indennizzo: null };
+            document.getElementById('chatbotMessages').innerHTML = '';
+            chatbotRender();
+        }
+        document.getElementById('chatbotFab').addEventListener('click', () => {
+            const panel = document.getElementById('chatbotPanel');
+            panel.classList.toggle('show');
+            if (panel.classList.contains('show') && chatbotState.step === 0 && chatbotState.history.length === 0) chatbotRender();
+        });
+        document.getElementById('chatbotClose').addEventListener('click', () => document.getElementById('chatbotPanel').classList.remove('show'));
  
         window.addEventListener('load', loadData);
     </script>
