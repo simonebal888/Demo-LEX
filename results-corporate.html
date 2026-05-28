@@ -62,6 +62,12 @@
         table.corp-table th { background: #003d66; color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
         table.corp-table td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; }
         table.corp-table tr:last-child td { font-weight: 700; background: #f0f7fb; }
+        .benchmark-controls { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px; }
+        .benchmark-field { flex: 1; min-width: 220px; }
+        .benchmark-field label { display: block; font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .benchmark-field select { width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0; border-radius: 6px; font-size: 14px; font-family: inherit; background: white; cursor: pointer; }
+        .benchmark-field select:focus { outline: none; border-color: #007CB0; }
+        .profilo-attivo-tag { display: inline-block; background: #86BC25; color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px; margin-right: 8px; }
     </style>
 </head>
 <body>
@@ -71,11 +77,11 @@
             <div class="header-subtitle">Fabbricati strumentali, contenuto e continuità operativa d'impresa</div>
         </div>
     </div>
-
+ 
     <div class="breadcrumb">
         <a href="search.html">← Torna alla ricerca</a> | Valutazione Corporate
     </div>
-
+ 
     <div class="container">
         <div class="immobile-header">
             <div class="corp-badge">🏭 Immobile strumentale d'impresa</div>
@@ -91,25 +97,24 @@
                 </div>
             </div>
         </div>
-
+ 
         <div class="main-tabs-container">
             <div class="main-tabs-header">
                 <button class="main-tab-button active" onclick="switchMainTab(event, 'main-immobile')">Fabbricato & Contenuto</button>
                 <button class="main-tab-button" onclick="switchMainTab(event, 'main-rischi')">Rischi</button>
                 <button class="main-tab-button" onclick="switchMainTab(event, 'main-coperture')">Coperture Assicurative</button>
             </div>
-
+ 
             <!-- ===== TAB 1: FABBRICATO & CONTENUTO ===== -->
             <div id="main-immobile" class="main-tab-content active">
-
-                <!-- Caratteristiche fabbricato -->
+ 
                 <div class="tabs-container">
                     <div class="tabs-header">
                         <button class="tab-button active" onclick="switchTab(event, 'tab-fabbricato')">Fabbricato</button>
                         <button class="tab-button" onclick="switchTab(event, 'tab-mercato')">Dinamica Mercato</button>
                         <button class="tab-button" onclick="switchTab(event, 'tab-valutazione')">Valutazione</button>
                     </div>
-
+ 
                     <div id="tab-fabbricato" class="tab-content active">
                         <div class="section-title">Caratteristiche del Fabbricato</div>
                         <div class="data-grid">
@@ -130,7 +135,7 @@
                             <div class="data-card"><div class="data-card-label">Grado urbanizzazione</div><div class="data-card-value" id="fabUrban">-</div></div>
                         </div>
                     </div>
-
+ 
                     <div id="tab-mercato" class="tab-content">
                         <div class="section-title">Dinamica Mercato Non Residenziale</div>
                         <div style="background-color: #f0f7fb; border-left: 3px solid #007CB0; padding: 18px 22px; border-radius: 6px; margin-bottom: 25px;">
@@ -159,7 +164,7 @@
                             <div class="data-card"><div class="data-card-label">Compravendite non res. (raggio)</div><div class="data-card-value" id="mktCompravendite">-</div></div>
                         </div>
                     </div>
-
+ 
                     <div id="tab-valutazione" class="tab-content">
                         <div class="section-title">Valore del Fabbricato</div>
                         <div class="info-box">
@@ -177,8 +182,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Valore del contenuto -->
+ 
                 <div class="tabs-container">
                     <div style="padding: 30px;">
                         <div class="section-title">Valore del Contenuto Aziendale</div>
@@ -198,8 +202,51 @@
                         </div>
                     </div>
                 </div>
+ 
+                <div class="tabs-container">
+                    <div style="padding: 30px;">
+                        <div class="section-title">Benchmark — Confronto con Imprese Simili</div>
+                        <div class="info-box">
+                            <p>Confronto del valore di fabbricato e contenuto rispetto a profili d'impresa differenti. Il valore del contenuto dipende fortemente dalla <strong>densità di capitale per metro quadro</strong> del settore produttivo e dalla <strong>dimensione</strong> dell'impresa, mentre il valore del fabbricato resta legato prevalentemente alla superficie e alla localizzazione. Selezionare un profilo per simulare il riposizionamento.</p>
+                        </div>
+ 
+                        <div class="benchmark-controls">
+                            <div class="benchmark-field">
+                                <label for="selSettore">Settore produttivo</label>
+                                <select id="selSettore">
+                                    <option value="tessile">Tessile / Abbigliamento</option>
+                                    <option value="metalmeccanica">Metalmeccanica</option>
+                                    <option value="alimentare">Alimentare</option>
+                                    <option value="logistica">Logistica / Magazzinaggio</option>
+                                    <option value="chimica">Chimica / Plastica</option>
+                                </select>
+                            </div>
+                            <div class="benchmark-field">
+                                <label for="selDimensione">Dimensione impresa</label>
+                                <select id="selDimensione">
+                                    <option value="micro">Micro (fino a 9 addetti)</option>
+                                    <option value="piccola">Piccola (10-49 addetti)</option>
+                                    <option value="media">Media (50-249 addetti)</option>
+                                    <option value="grande">Grande (250+ addetti)</option>
+                                </select>
+                            </div>
+                        </div>
+ 
+                        <div id="profiloRealeNota" style="font-size: 12px; color: #666; margin-bottom: 20px;"></div>
+ 
+                        <div class="data-grid">
+                            <div class="data-card" style="border-left-color:#86BC25;"><div class="data-card-label">Valore fabbricato (profilo)</div><div class="data-card-value" id="bmFabbricato">-</div></div>
+                            <div class="data-card" style="border-left-color:#FF9800;"><div class="data-card-label">Valore contenuto (profilo)</div><div class="data-card-value" id="bmContenuto">-</div></div>
+                            <div class="data-card" style="border-left-color:#003d66;"><div class="data-card-label">Valore assicurabile (profilo)</div><div class="data-card-value" id="bmTotale" style="color:#003d66;">-</div></div>
+                        </div>
+ 
+                        <div style="margin-top: 10px; margin-bottom: 10px; font-size: 13px; color: #666;">Densità di capitale del profilo selezionato: <strong id="bmDensita">-</strong></div>
+ 
+                        <div class="chart-container" style="height: 340px;"><canvas id="chartBenchmark"></canvas></div>
+                    </div>
+                </div>
             </div>
-
+ 
             <!-- ===== TAB 2: RISCHI ===== -->
             <div id="main-rischi" class="main-tab-content">
                 <div class="tabs-container">
@@ -215,7 +262,7 @@
                             </div>
                         </div>
                     </div>
-
+ 
                     <div class="section-title">Riepilogo Rischi</div>
                     <div class="data-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-bottom: 40px;">
                         <div class="data-card" style="border-left: 4px solid #D32F2F;">
@@ -235,7 +282,7 @@
                             <div style="background:#f3e5f5; padding:12px; border-radius:6px; text-align:center;"><div style="font-size:11px; color:#4A148C; font-weight:600; text-transform:uppercase;">Perdita attesa (50 anni)</div><div style="font-size:22px; font-weight:700; color:#4A148C;" id="rBIVal">€ -</div></div>
                         </div>
                     </div>
-
+ 
                     <div class="section-title">Business Interruption — Continuità Operativa</div>
                     <div class="info-box" style="background-color:#f3e5f5; border-left-color:#6A1B9A;">
                         <p>La <strong>Business Interruption</strong> misura la perdita economica derivante dall'interruzione dell'attività produttiva a seguito di un sinistro che renda inagibile il fabbricato. Si calcola sul <strong>margine di contribuzione giornaliero</strong> moltiplicato per i giorni di fermo stimati e per la probabilità annua di accadimento dell'evento.</p>
@@ -244,14 +291,14 @@
                         <thead><tr><th>Parametro</th><th style="text-align:right;">Valore</th></tr></thead>
                         <tbody id="biTable"></tbody>
                     </table>
-
+ 
                     <div class="section-title">Analisi dell'Indice IVE-C</div>
                     <div style="margin-bottom: 25px;"><h4 style="font-size:14px; font-weight:600; margin-bottom:12px; color:#003d66;">Metodologia</h4><div class="info-box" id="iveMetodologia">-</div></div>
                     <div style="margin-bottom: 25px;"><h4 style="font-size:14px; font-weight:600; margin-bottom:12px; color:#003d66;">Contributi dei Rischi</h4><div class="info-box" id="iveContributi">-</div></div>
                     <div style="margin-bottom: 25px;"><h4 style="font-size:14px; font-weight:600; margin-bottom:12px; color:#003d66;">Sintesi</h4><div class="info-box" style="background-color:#fff3cd; border-left-color:#FBC02D;" id="iveSintesi">-</div></div>
                 </div>
             </div>
-
+ 
             <!-- ===== TAB 3: COPERTURE ===== -->
             <div id="main-coperture" class="main-tab-content">
                 <div class="tabs-container">
@@ -259,7 +306,7 @@
                     <div class="info-box">
                         <p id="copertureProfilo">-</p>
                     </div>
-
+ 
                     <div class="section-title">Proposta di Copertura Corporate</div>
                     <div class="info-box">
                         <p style="margin-bottom:15px;">Si propone l'attivazione di una polizza <strong>"Property & Business All Risks"</strong> dedicata alle imprese, modulare e calibrata sul profilo di rischio del fabbricato strumentale, del contenuto e della continuità operativa.</p>
@@ -272,13 +319,13 @@
                             <li><strong>Responsabilità Civile</strong>: RC verso terzi e RC prodotti connessa all'attività d'impresa.</li>
                         </ul>
                     </div>
-
+ 
                     <div class="section-title">Profilo Coperture — Esposizione vs Copertura</div>
                     <div class="info-box">
                         <p>Il grafico confronta il <strong>profilo di esposizione al rischio</strong> dell'impresa con il <strong>livello di copertura</strong> della polizza proposta, sulle voci property e corporate.</p>
                     </div>
                     <div class="chart-container" style="height: 450px;"><canvas id="chartCoperture"></canvas></div>
-
+ 
                     <div class="section-title" style="margin-top: 40px;">Premio Tecnico Indicativo</div>
                     <div class="data-grid">
                         <div class="data-card"><div class="data-card-label">Premio puro (EAL annuo)</div><div class="data-card-value" id="premioPuro">-</div></div>
@@ -292,9 +339,8 @@
             </div>
         </div>
     </div>
-
+ 
     <script>
-        // ====== DATI FABBRICATO CORPORATE (capannone Lucca, da report Lex) ======
         const fabbricatiData = {
             'C1': {
                 superficie_mq: 500,
@@ -309,40 +355,36 @@
                 visibilita: 'Strada intermedia',
                 manovra: 'Normale',
                 urbanizzazione: 'Alto (165 fabbricati/kmq)',
-                // Mercato
                 zona: 'Montuolo, S. Angelo, Antraccoli',
                 posizione: 'Semiperiferia',
                 dinamica: 'Media',
                 quotazione_mq: 496,
                 andamento_commerciale: '+0,89% anno',
-                // Valutazione (dal report Lex)
                 val_min: 226448,
                 val_med: 248219,
                 val_max: 269990,
                 prezzo_mq: 496,
-                // Contenuto aziendale (stimato)
                 contenuto: [
                     { categoria: 'Macchinari produttivi', descrizione: 'Linea di tessitura, telai, orditoi', valore: 180000 },
                     { categoria: 'Impianti', descrizione: 'Impianto elettrico, HVAC, aria compressa', valore: 45000 },
                     { categoria: 'Attrezzature', descrizione: 'Muletti, scaffalature, banchi lavoro', valore: 28000 },
                     { categoria: 'Scorte e magazzino', descrizione: 'Materie prime e semilavorati', valore: 62000 }
                 ],
-                // Dati economici impresa (per Business Interruption)
                 fatturato_annuo: 2400000,
                 margine_contribuzione_pct: 35,
                 dipendenti: 18,
                 periodo_indennizzo_mesi: 12,
-                // Rischio (Lucca: sismico superiore alla media)
                 pga_475: 0.175,
                 classe_pai_frane: 'P1',
                 classe_pai_alluvioni: 'P2',
                 pendenza: 3,
                 epoca_costruzione: '1981-1990',
-                tipologia_strutturale: 'ca'
+                tipologia_strutturale: 'ca',
+                profilo_settore: 'tessile',
+                profilo_dimensione: 'piccola'
             }
         };
-
-        // ====== PARAMETRI MODELLO IVE-C ======
+ 
         const probAnnuaPAI = { 'P0': 0, 'P1': 1/300, 'P2': 1/100, 'P3': 1/50, 'P4': 1/30 };
         const vulnSismicaEpoca = {
             'pre-1919': { muratura: 0.70, ca: 0.60, misto: 0.68 },
@@ -365,52 +407,60 @@
             if (pga < 0.25) return 'Elevata';
             return 'Molto Elevata';
         }
-
+ 
+        const densitaContenutoSettore = {
+            tessile:         { densita: 630, label: 'Tessile / Abbigliamento' },
+            metalmeccanica:  { densita: 1250, label: 'Metalmeccanica' },
+            alimentare:      { densita: 980, label: 'Alimentare' },
+            logistica:       { densita: 320, label: 'Logistica / Magazzinaggio' },
+            chimica:         { densita: 1450, label: 'Chimica / Plastica' }
+        };
+        const fattoreDimensione = {
+            micro:   { fatt: 0.65, label: 'Micro (fino a 9 addetti)' },
+            piccola: { fatt: 1.00, label: 'Piccola (10-49 addetti)' },
+            media:   { fatt: 1.55, label: 'Media (50-249 addetti)' },
+            grande:  { fatt: 2.30, label: 'Grande (250+ addetti)' }
+        };
+        const premioFabbricatoDimensione = { micro: 0.92, piccola: 1.00, media: 1.08, grande: 1.15 };
+ 
         function getFabbricato() {
             const data = JSON.parse(sessionStorage.getItem('immobileCorporateData'));
             const id = (data && data.immobile_id) ? data.immobile_id : 'C1';
             return { meta: data, dati: fabbricatiData[id] || fabbricatiData['C1'] };
         }
-
+ 
         let calcoloGlobale = null;
-
+        let chartBenchmark = null;
+ 
         function calcolaIVECorporate(f) {
             const valFabbricato = f.val_med;
             const valContenuto = f.contenuto.reduce((s, c) => s + c.valore, 0);
             const valAssicurabile = valFabbricato + valContenuto;
-
-            // --- SISMICA (su fabbricato + contenuto) ---
+ 
             const probSis = 1 / 475;
             const vulnStrut = vulnSismicaEpoca[f.epoca_costruzione][f.tipologia_strutturale];
             const pgaNorm = Math.min(f.pga_475 / 0.35, 1);
             const drSis = vulnStrut * pgaNorm;
             const fAmpl = 4.5;
             const ealSismico = valAssicurabile * probSis * drSis * fAmpl;
-
-            // --- FRANE ---
+ 
             const ealFrane = valAssicurabile * probAnnuaPAI[f.classe_pai_frane] * damageRatioFrane[f.classe_pai_frane];
-
-            // --- ALLUVIONI ---
             const ealAlluvioni = valAssicurabile * probAnnuaPAI[f.classe_pai_alluvioni] * damageRatioAlluvioni[f.classe_pai_alluvioni];
-
-            // --- BUSINESS INTERRUPTION ---
-            // Margine di contribuzione giornaliero
+ 
             const margineAnnuo = f.fatturato_annuo * (f.margine_contribuzione_pct / 100);
             const margineGiornaliero = margineAnnuo / 365;
-            // Giorni di fermo attesi pesati sulla probabilità degli eventi catastrofali
-            // (un evento grave genera fermo proporzionale alla gravità del danno fisico)
-            const giorniFermoSisma = 270;      // sisma grave: inagibilità ~9 mesi
+            const giorniFermoSisma = 270;
             const giorniFermoFrane = 120;
             const giorniFermoAlluvioni = 90;
             const biSisma = margineGiornaliero * giorniFermoSisma * probSis * drSis;
             const biFrane = margineGiornaliero * giorniFermoFrane * probAnnuaPAI[f.classe_pai_frane] * damageRatioFrane[f.classe_pai_frane];
             const biAlluvioni = margineGiornaliero * giorniFermoAlluvioni * probAnnuaPAI[f.classe_pai_alluvioni] * damageRatioAlluvioni[f.classe_pai_alluvioni];
             const ealBI = biSisma + biFrane + biAlluvioni;
-
+ 
             const ealTotaleAnnuo = ealSismico + ealFrane + ealAlluvioni + ealBI;
             const perdita50 = ealTotaleAnnuo * VITA_UTILE_ANNI;
             const ivePerc = (perdita50 / valAssicurabile) * 100;
-
+ 
             return {
                 valFabbricato, valContenuto, valAssicurabile,
                 margineAnnuo, margineGiornaliero,
@@ -426,17 +476,16 @@
                 giorniFermoSisma
             };
         }
-
+ 
         const fmtE = (v) => '€ ' + Math.round(v).toLocaleString('it-IT');
-
-        // ====== COORDINATE MAPPA (Lucca) ======
+ 
         const coordinateFabbricato = {
             'C1': { lat: 43.8430, lng: 10.5050, nome: 'Via Dante Alighieri 120, Lucca (LU)' },
             'C99': { lat: 43.7980, lng: 11.2480, nome: 'Via dell\'Industria 8, Firenze (FI)' },
             'C98': { lat: 43.8670, lng: 10.2380, nome: 'Viale Europa 45, Viareggio (LU)' }
         };
         let mappaLeaflet = null, cerchioRaggio = null;
-
+ 
         function inizializzaMappa() {
             const f = getFabbricato();
             const id = (f.meta && f.meta.immobile_id) ? f.meta.immobile_id : 'C1';
@@ -448,22 +497,73 @@
             L.marker([coord.lat, coord.lng], { icon: icona }).addTo(mappaLeaflet).bindPopup('<strong>' + coord.nome + '</strong>');
             cerchioRaggio = L.circle([coord.lat, coord.lng], { color: '#007CB0', fillColor: '#007CB0', fillOpacity: 0.15, weight: 2, radius: 2000 }).addTo(mappaLeaflet);
             mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20,20] });
+            setTimeout(() => { mappaLeaflet.invalidateSize(); mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20,20] }); }, 300);
         }
         function aggiornaCerchio(raggioKm) {
             if (!cerchioRaggio || !mappaLeaflet) return;
             cerchioRaggio.setRadius(raggioKm * 1000);
             mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20,20] });
         }
-
+ 
         function ricalcolaCompravendite(raggioKm) {
-            const base = 18; // compravendite non residenziali baseline 2km zona Lucca
+            const base = 18;
             const fattoreArea = Math.pow(raggioKm / 2, 1.6);
             document.getElementById('mktCompravendite').textContent = Math.round(base * fattoreArea);
-            const etich = document.getElementById('raggioCompravendite');
-            if (etich) etich.textContent = raggioKm.toString().replace('.', ',');
         }
-
-        // ====== RADAR COPERTURE ======
+ 
+        function calcolaBenchmark(f, settore, dimensione) {
+            const dens = densitaContenutoSettore[settore].densita;
+            const fattDim = fattoreDimensione[dimensione].fatt;
+            const valContenuto = f.superficie_mq * dens * fattDim;
+            const valFabbricato = f.val_med * premioFabbricatoDimensione[dimensione];
+            return {
+                valContenuto: Math.round(valContenuto),
+                valFabbricato: Math.round(valFabbricato),
+                valTotale: Math.round(valContenuto + valFabbricato),
+                densitaEffettiva: Math.round(dens * fattDim)
+            };
+        }
+ 
+        function aggiornaBenchmark() {
+            const f = getFabbricato().dati;
+            const settore = document.getElementById('selSettore').value;
+            const dimensione = document.getElementById('selDimensione').value;
+            const bm = calcolaBenchmark(f, settore, dimensione);
+ 
+            document.getElementById('bmFabbricato').textContent = fmtE(bm.valFabbricato);
+            document.getElementById('bmContenuto').textContent = fmtE(bm.valContenuto);
+            document.getElementById('bmTotale').textContent = fmtE(bm.valTotale);
+            document.getElementById('bmDensita').textContent = `€ ${bm.densitaEffettiva.toLocaleString('it-IT')} / mq`;
+ 
+            const isReale = (settore === f.profilo_settore && dimensione === f.profilo_dimensione);
+            const nota = document.getElementById('profiloRealeNota');
+            if (isReale) {
+                nota.innerHTML = '<span class="profilo-attivo-tag">PROFILO REALE</span> Corrisponde al profilo effettivo di Manifatture Toscane S.r.l. (Tessile, Piccola impresa).';
+            } else {
+                nota.innerHTML = `Profilo simulato: <strong>${densitaContenutoSettore[settore].label}</strong> · <strong>${fattoreDimensione[dimensione].label}</strong>. Profilo reale dell'impresa: Tessile, Piccola.`;
+            }
+ 
+            const valContenutoReale = f.contenuto.reduce((s,c) => s + c.valore, 0);
+            const ctx = document.getElementById('chartBenchmark').getContext('2d');
+            if (chartBenchmark) chartBenchmark.destroy();
+            chartBenchmark = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Valore Fabbricato', 'Valore Contenuto', 'Valore Assicurabile'],
+                    datasets: [
+                        { label: 'Manifatture Toscane (reale)', data: [f.val_med, valContenutoReale, f.val_med + valContenutoReale], backgroundColor: '#86BC25' },
+                        { label: 'Profilo selezionato', data: [bm.valFabbricato, bm.valContenuto, bm.valTotale], backgroundColor: '#007CB0' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } },
+                        tooltip: { callbacks: { label: (c) => c.dataset.label + ': € ' + c.parsed.y.toLocaleString('it-IT') } } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: (v) => '€ ' + (v/1000) + 'k' } } }
+                }
+            });
+        }
+ 
         function createCopertureRadar(calc) {
             const labels = ['Incendio fabbricato', 'Incendio contenuto', 'Guasti macchine', 'Business Interruption', 'Terremoto', 'Alluvioni', 'RC prodotti', 'Furto'];
             const mappaEsp = (cl) => {
@@ -471,7 +571,6 @@
                 return m[cl] !== undefined ? m[cl] : 50;
             };
             const espSis = mappaEsp(calc.classSismica);
-            const espFra = mappaEsp(calc.classFrane);
             const espAll = mappaEsp(calc.classAlluvioni);
             const esposizione = [70, 75, 65, 80, espSis, espAll, 50, 45];
             const copertura = [90, 85, 80, 85, 65, 55, 70, 60];
@@ -485,7 +584,7 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 13 } } } }, scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: 10 } }, pointLabels: { font: { size: 11, weight: '600' } } } } }
             });
         }
-
+ 
         function createValutazioneChart(f) {
             const ctx = document.getElementById('chartValutazione').getContext('2d');
             new Chart(ctx, {
@@ -494,14 +593,12 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } }
             });
         }
-
-        // ====== CARICAMENTO PAGINA ======
+ 
         function loadData() {
             const { meta, dati: f } = getFabbricato();
             const calc = calcolaIVECorporate(f);
             calcoloGlobale = calc;
-
-            // Header
+ 
             if (meta) {
                 document.getElementById('indirizzoCompleto').textContent = `${meta.via}, ${meta.civico} — ${meta.cap} ${meta.citta} (${meta.provincia})`;
                 document.getElementById('detailCategoria').textContent = meta.categoria || f.destinazione;
@@ -509,10 +606,8 @@
                 document.getElementById('indirizzoCompleto').textContent = 'Via Dante Alighieri 120 — 55100 Lucca (LU)';
                 document.getElementById('detailCategoria').textContent = 'D/1';
             }
-            const impresa = JSON.parse(sessionStorage.getItem('immobileCorporateData'));
             document.getElementById('detailImpresa').textContent = 'Manifatture Toscane S.r.l.';
-
-            // Fabbricato
+ 
             document.getElementById('fabSuperficie').textContent = `${f.superficie_mq} m²`;
             document.getElementById('fabDestinazione').textContent = f.destinazione;
             document.getElementById('fabStruttura').textContent = f.struttura;
@@ -525,23 +620,20 @@
             document.getElementById('fabVisibilita').textContent = f.visibilita;
             document.getElementById('fabManovra').textContent = f.manovra;
             document.getElementById('fabUrban').textContent = f.urbanizzazione;
-
-            // Mercato
+ 
             document.getElementById('mktZona').textContent = f.zona;
             document.getElementById('mktPosizione').textContent = f.posizione;
             document.getElementById('mktDinamica').textContent = f.dinamica;
             document.getElementById('mktQuotazione').textContent = `€ ${f.quotazione_mq}`;
             document.getElementById('mktAndamento').textContent = f.andamento_commerciale;
-
-            // Valutazione
+ 
             document.getElementById('valSuperficie').textContent = `${f.superficie_mq} m²`;
             document.getElementById('valPrezzoMq').textContent = `€ ${f.prezzo_mq}`;
             document.getElementById('valMin').textContent = fmtE(f.val_min);
             document.getElementById('valMed').textContent = fmtE(f.val_med);
             document.getElementById('valMax').textContent = fmtE(f.val_max);
             createValutazioneChart(f);
-
-            // Contenuto
+ 
             const tbody = document.getElementById('contenutoTable');
             tbody.innerHTML = '';
             f.contenuto.forEach(c => {
@@ -551,8 +643,13 @@
             document.getElementById('riepFabbricato').textContent = fmtE(calc.valFabbricato);
             document.getElementById('riepContenuto').textContent = fmtE(calc.valContenuto);
             document.getElementById('riepTotale').textContent = fmtE(calc.valAssicurabile);
-
-            // IVE-C header e card
+ 
+            document.getElementById('selSettore').value = f.profilo_settore;
+            document.getElementById('selDimensione').value = f.profilo_dimensione;
+            document.getElementById('selSettore').addEventListener('change', aggiornaBenchmark);
+            document.getElementById('selDimensione').addEventListener('change', aggiornaBenchmark);
+            aggiornaBenchmark();
+ 
             document.getElementById('iveTotaleValore').textContent = fmtE(calc.perdita50);
             document.getElementById('iveTotalePercentuale').textContent = `${calc.ivePerc.toFixed(1)}% del valore assicurabile`;
             document.getElementById('rSismica').textContent = calc.classSismica;
@@ -563,8 +660,7 @@
             document.getElementById('rAlluvioniVal').textContent = fmtE(calc.espAlluvioni);
             document.getElementById('rBI').textContent = `${f.periodo_indennizzo_mesi} mesi indennizzo`;
             document.getElementById('rBIVal').textContent = fmtE(calc.espBI);
-
-            // Tabella Business Interruption
+ 
             const biBody = document.getElementById('biTable');
             biBody.innerHTML = `
                 <tr><td>Fatturato annuo</td><td style="text-align:right;">${fmtE(f.fatturato_annuo)}</td></tr>
@@ -574,8 +670,7 @@
                 <tr><td>Periodo massimo di indennizzo</td><td style="text-align:right;">${f.periodo_indennizzo_mesi} mesi</td></tr>
                 <tr><td>EAL Business Interruption (annuo)</td><td style="text-align:right;">${fmtE(calc.ealBI)}</td></tr>
             `;
-
-            // Analisi testuale IVE-C
+ 
             const contributi = [
                 { nome: 'sismico', val: calc.ealSismico },
                 { nome: 'business interruption', val: calc.ealBI },
@@ -585,21 +680,18 @@
             document.getElementById('iveMetodologia').textContent = "L'IVE-C estende il modello Expected Annual Loss al contesto d'impresa. La perdita attesa è calcolata su fabbricato e contenuto (macchinari, impianti, scorte) per i rischi catastrofali, integrando la componente di Business Interruption che quantifica il mancato margine durante il fermo attività. Fonti: INGV MPS04 (sismica), ISPRA-PAI (frane e alluvioni), dati economici d'impresa per la continuità operativa.";
             document.getElementById('iveContributi').textContent = `L'IVE-C pari a circa ${calc.ivePerc.toFixed(1)}% del valore assicurabile (€ ${Math.round(calc.valAssicurabile).toLocaleString('it-IT')}) corrisponde a una perdita cumulata attesa di ${fmtE(calc.perdita50)} su 50 anni, equivalente a un EAL annuo di ${fmtE(calc.ealTotaleAnnuo)}. La componente dominante è il rischio ${contributi[0].nome} (${fmtE(contributi[0].val)}/anno), seguito da ${contributi[1].nome} (${fmtE(contributi[1].val)}/anno). La Business Interruption rappresenta una quota rilevante dell'esposizione totale, tipica delle realtà produttive in cui il fermo dell'attività genera perdite economiche superiori al danno materiale.`;
             document.getElementById('iveSintesi').textContent = `Il profilo di rischio dell'impresa è guidato dal rischio ${contributi[0].nome}. Una strategia di trasferimento del rischio efficace deve coprire non solo il valore patrimoniale del fabbricato e del contenuto, ma soprattutto la continuità operativa, dimensionando il periodo di indennizzo Business Interruption sui tempi reali di ripristino della capacità produttiva. L'EAL annuo (${fmtE(calc.ealTotaleAnnuo)}) costituisce il riferimento per il premio tecnico minimo.`;
-
-            // Coperture - profilo
+ 
             document.getElementById('copertureProfilo').textContent = `L'impresa Manifatture Toscane S.r.l. opera nel settore tessile (ATECO C13.20) con un fatturato annuo di € ${f.fatturato_annuo.toLocaleString('it-IT')} e ${f.dipendenti} dipendenti. Il fabbricato strumentale di Lucca, in zona a pericolosità sismica superiore alla media, ospita la linea produttiva principale. Il valore assicurabile complessivo (fabbricato + contenuto) è di ${fmtE(calc.valAssicurabile)}. Il profilo richiede una copertura property completa integrata con la protezione della continuità operativa.`;
-
-            // Premio
+ 
             const premioPuro = calc.ealTotaleAnnuo;
             const caricamento = premioPuro * 0.30;
             const premioTecnico = premioPuro + caricamento;
             document.getElementById('premioPuro').textContent = fmtE(premioPuro);
             document.getElementById('premioCaricamento').textContent = fmtE(caricamento);
             document.getElementById('premioTecnico').textContent = fmtE(premioTecnico);
-
+ 
             createCopertureRadar(calc);
-
-            // Mappa + slider
+ 
             inizializzaMappa();
             const slider = document.getElementById('raggioSlider');
             const valore = document.getElementById('raggioValore');
@@ -614,13 +706,20 @@
                 aggiornaCerchio(parseFloat(slider.value));
             }
         }
-
+ 
         function switchMainTab(event, tabId) {
             event.preventDefault();
             document.querySelectorAll('.main-tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.main-tab-button').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             event.target.classList.add('active');
+ 
+            if (tabId === 'main-immobile' && mappaLeaflet) {
+                setTimeout(() => {
+                    mappaLeaflet.invalidateSize();
+                    if (cerchioRaggio) mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20, 20] });
+                }, 100);
+            }
         }
         function switchTab(event, tabId) {
             event.preventDefault();
@@ -629,8 +728,15 @@
             event.target.parentElement.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             event.target.classList.add('active');
+ 
+            if (tabId === 'tab-mercato' && mappaLeaflet) {
+                setTimeout(() => {
+                    mappaLeaflet.invalidateSize();
+                    if (cerchioRaggio) mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20, 20] });
+                }, 100);
+            }
         }
-
+ 
         window.addEventListener('load', loadData);
     </script>
 </body>
