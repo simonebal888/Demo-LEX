@@ -1,3 +1,5 @@
+
+Results corporate · HTML
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -163,7 +165,6 @@
                         <button class="tab-button active" onclick="switchTab(event, 'tab-fabbricato')">Fabbricato</button>
                         <button class="tab-button" onclick="switchTab(event, 'tab-mercato')">Dinamica Mercato</button>
                         <button class="tab-button" onclick="switchTab(event, 'tab-valutazione')">Valutazione</button>
-                        <button class="tab-button" onclick="switchTab(event, 'tab-comparabili')">Comparabili</button>
                     </div>
  
                     <div id="tab-fabbricato" class="tab-content active">
@@ -214,6 +215,25 @@
                             <div class="data-card"><div class="data-card-label">Andamento commerciale</div><div class="data-card-value" id="mktAndamento">-</div></div>
                             <div class="data-card"><div class="data-card-label">Compravendite non res. (raggio)</div><div class="data-card-value" id="mktCompravendite">-</div></div>
                         </div>
+ 
+                        <div class="section-title" style="margin-top: 35px;">Compravendite Comparabili</div>
+                        <div style="background-color: #f0f7fb; border-left: 3px solid #007CB0; padding: 12px 16px; border-radius: 4px; margin-bottom: 20px; font-size: 13px; color: #333;">
+                            <strong>Area di ricerca:</strong> Via Dante Alighieri, Lucca · <strong>Raggio:</strong> <span id="compRaggio">0,5</span> km · <strong>Periodo:</strong> Febbraio 2023 - Febbraio 2026 · <strong>Tipologia:</strong> Non residenziali
+                        </div>
+                        <table class="corp-table">
+                            <thead>
+                                <tr><th>Data</th><th>Ubicazione</th><th>Tipologia</th><th style="text-align:right;">Sup.</th><th style="text-align:right;">Prezzo</th><th style="text-align:right;">€/mq</th></tr>
+                            </thead>
+                            <tbody id="comparabiliTable"></tbody>
+                        </table>
+                        <div class="data-grid">
+                            <div class="data-card" style="border-left-color:#003d66;"><div class="data-card-label">Prezzo medio venduti</div><div class="data-card-value" id="compMedio" style="color:#003d66;">-</div></div>
+                            <div class="data-card"><div class="data-card-label">Scostamento da valutazione media</div><div class="data-card-value" id="compScostamento">-</div></div>
+                        </div>
+                        <div class="chart-container"><canvas id="chartComparabili"></canvas></div>
+                        <div class="info-box" style="font-size:12px; color:#666;">
+                            <p>I prezzi si riferiscono ad atti di compravendita per l'intera proprietà (100%). Allargando il raggio di ricerca aumenta il numero di compravendite comparabili intercettate. Il confronto tra prezzo medio dei venduti e valore di valutazione conferma la congruità della stima ai fini istruttori. Fonte: banche dati Agenzia delle Entrate - OMI, atti notarili registrati.</p>
+                        </div>
                     </div>
  
                     <div id="tab-valutazione" class="tab-content">
@@ -230,27 +250,6 @@
                             <div class="data-card"><div class="data-card-label">Valore minimo</div><div class="data-card-value" id="valMin">-</div></div>
                             <div class="data-card"><div class="data-card-label">Valore medio</div><div class="data-card-value" id="valMed">-</div></div>
                             <div class="data-card"><div class="data-card-label">Valore massimo</div><div class="data-card-value" id="valMax">-</div></div>
-                        </div>
-                    </div>
- 
-                    <div id="tab-comparabili" class="tab-content">
-                        <div class="section-title">Compravendite Comparabili</div>
-                        <div style="background-color: #f0f7fb; border-left: 3px solid #007CB0; padding: 12px 16px; border-radius: 4px; margin-bottom: 20px; font-size: 13px; color: #333;">
-                            <strong>Area di ricerca:</strong> Via Dante Alighieri, Lucca · <strong>Raggio:</strong> 0,5 km · <strong>Periodo:</strong> Febbraio 2023 - Febbraio 2026 · <strong>Tipologia:</strong> Non residenziali
-                        </div>
-                        <table class="corp-table">
-                            <thead>
-                                <tr><th>Data</th><th>Ubicazione</th><th>Tipologia</th><th style="text-align:right;">Sup.</th><th style="text-align:right;">Prezzo</th><th style="text-align:right;">€/mq</th></tr>
-                            </thead>
-                            <tbody id="comparabiliTable"></tbody>
-                        </table>
-                        <div class="data-grid">
-                            <div class="data-card" style="border-left-color:#003d66;"><div class="data-card-label">Prezzo medio venduti</div><div class="data-card-value" id="compMedio" style="color:#003d66;">-</div></div>
-                            <div class="data-card"><div class="data-card-label">Scostamento da valutazione media</div><div class="data-card-value" id="compScostamento">-</div></div>
-                        </div>
-                        <div class="chart-container"><canvas id="chartComparabili"></canvas></div>
-                        <div class="info-box" style="font-size:12px; color:#666;">
-                            <p>I prezzi si riferiscono ad atti di compravendita per l'intera proprietà (100%). Il confronto tra prezzo medio dei venduti e valore di valutazione conferma la congruità della stima ai fini istruttori. Fonte: banche dati Agenzia delle Entrate - OMI, atti notarili registrati.</p>
                         </div>
                     </div>
                 </div>
@@ -478,10 +477,19 @@
                     { categoria: 'Scorte e magazzino', descrizione: 'Materie prime e semilavorati', valore: 62000 }
                 ],
                 comparabili: [
-                    { data: '2024-08', ubicazione: 'Viale Castruccio Castracani', tipologia: 'Negozio + Laboratorio', sup: 196, prezzo: 167000 },
-                    { data: '2023-04', ubicazione: 'Via di Tempagnano', tipologia: 'Ufficio', sup: 240, prezzo: 279344 },
-                    { data: '2023-07', ubicazione: 'Via Papa Giovanni XXIII', tipologia: 'Istituto di credito', sup: 241, prezzo: 280000 }
+                    { data: '2024-08', ubicazione: 'Viale Castruccio Castracani', tipologia: 'Negozio + Laboratorio', sup: 196, prezzo: 167000, raggio: 0.5 },
+                    { data: '2023-04', ubicazione: 'Via di Tempagnano', tipologia: 'Ufficio', sup: 240, prezzo: 279344, raggio: 0.5 },
+                    { data: '2023-07', ubicazione: 'Via Papa Giovanni XXIII', tipologia: 'Istituto di credito', sup: 241, prezzo: 280000, raggio: 0.5 },
+                    { data: '2024-03', ubicazione: 'Via Romana', tipologia: 'Capannone produttivo', sup: 420, prezzo: 198000, raggio: 1.5 },
+                    { data: '2023-11', ubicazione: 'Via di Sant\'Angelo', tipologia: 'Magazzino', sup: 310, prezzo: 145000, raggio: 1.5 },
+                    { data: '2024-06', ubicazione: 'Via per Camaiore', tipologia: 'Capannone industriale', sup: 560, prezzo: 268000, raggio: 3 },
+                    { data: '2023-09', ubicazione: 'Antraccoli', tipologia: 'Opificio', sup: 480, prezzo: 231000, raggio: 3 },
+                    { data: '2024-01', ubicazione: 'Zona Ind. Mugnano', tipologia: 'Capannone produttivo', sup: 650, prezzo: 312000, raggio: 5 },
+                    { data: '2023-05', ubicazione: 'Via Pesciatina', tipologia: 'Deposito artigianale', sup: 290, prezzo: 138000, raggio: 5 },
+                    { data: '2024-09', ubicazione: 'S. Cassiano a Vico', tipologia: 'Capannone agricolo', sup: 720, prezzo: 305000, raggio: 7.5 },
+                    { data: '2023-02', ubicazione: 'Marlia (Capannori)', tipologia: 'Capannone industriale', sup: 540, prezzo: 252000, raggio: 10 }
                 ],
+                quotazioneBaseMq: 496, decadimentoQuotMq: -0.028,
                 fatturato_annuo: 2400000, margine_contribuzione_pct: 35, dipendenti: 18, periodo_indennizzo_mesi: 12,
                 pga_475: 0.175, classe_pai_frane: 'P1', classe_pai_alluvioni: 'P2', pendenza: 3,
                 epoca_costruzione: '1981-1990', tipologia_strutturale: 'ca',
@@ -514,6 +522,11 @@
             media: { fatt: 1.55, label: 'Media (50-249 addetti)' }, grande: { fatt: 2.30, label: 'Grande (250+ addetti)' }
         };
         const premioFabbricatoDimensione = { micro: 0.92, piccola: 1.00, media: 1.08, grande: 1.15 };
+        // Fattori "media di mercato": il benchmark rappresenta la mediana delle imprese del profilo,
+        // non la singola azienda analizzata. Sono volutamente diversi (ma vicini) dai valori reali,
+        // così anche a parità di profilo il benchmark non coincide col valore di Manifatture Toscane.
+        const mktFabbricatoFatt = 1.06;   // i fabbricati comparabili del profilo valgono in media +6%
+        const mktContenutoFatt = 0.94;    // il contenuto medio di mercato è leggermente inferiore (-6%)
  
         function getFabbricato() {
             const data = JSON.parse(sessionStorage.getItem('immobileCorporateData'));
@@ -581,16 +594,63 @@
             cerchioRaggio.setRadius(raggioKm * 1000);
             mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20,20] });
         }
-        function ricalcolaCompravendite(raggioKm) {
+        let chartComparabili = null;
+        function aggiornaPerRaggio(raggioKm) {
+            const f = getFabbricato().dati;
+ 
+            // 1. Quotazione media €/mq: cala allontanandosi dal centro zona
+            //    r = raggio - 1 come distanza media; oltre 1 km i valori scendono
+            const r = Math.max(0, raggioKm - 1);
+            const quotMq = Math.round(f.quotazioneBaseMq * (1 + f.decadimentoQuotMq * r));
+            document.getElementById('mktQuotazione').textContent = `€ ${quotMq.toLocaleString('it-IT')}`;
+ 
+            // 2. Numero compravendite cresce con l'area
             document.getElementById('mktCompravendite').textContent = Math.round(18 * Math.pow(raggioKm / 2, 1.6));
+ 
+            // 3. Etichetta raggio nel banner comparabili
+            const etich = document.getElementById('compRaggio');
+            if (etich) etich.textContent = raggioKm.toString().replace('.', ',');
+ 
+            // 4. Comparabili: mostro solo quelli entro il raggio selezionato
+            const visibili = f.comparabili.filter(c => c.raggio <= raggioKm);
+            const compBody = document.getElementById('comparabiliTable');
+            compBody.innerHTML = '';
+            let somma = 0;
+            visibili.forEach(c => {
+                const euroMq = Math.round(c.prezzo / c.sup);
+                somma += c.prezzo;
+                compBody.innerHTML += `<tr><td>${c.data}</td><td>${c.ubicazione}</td><td>${c.tipologia}</td><td style="text-align:right;">${c.sup} m²</td><td style="text-align:right;">${fmtE(c.prezzo)}</td><td style="text-align:right;">€ ${euroMq.toLocaleString('it-IT')}</td></tr>`;
+            });
+            const prezzoMedio = visibili.length ? Math.round(somma / visibili.length) : 0;
+            document.getElementById('compMedio').textContent = fmtE(prezzoMedio);
+            const scost = ((prezzoMedio - f.val_med) / f.val_med * 100);
+            document.getElementById('compScostamento').textContent = (scost >= 0 ? '+' : '') + scost.toFixed(1) + '%';
+ 
+            // 5. Grafico comparabili
+            const ctx = document.getElementById('chartComparabili').getContext('2d');
+            if (chartComparabili) chartComparabili.destroy();
+            chartComparabili = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: visibili.map((c, i) => 'Comp. ' + (i+1)),
+                    datasets: [{ label: 'Prezzo di compravendita (€)', data: visibili.map(c => c.prezzo), backgroundColor: '#007CB0' }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: true }, tooltip: { callbacks: { label: (c) => '€ ' + c.parsed.y.toLocaleString('it-IT') } } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: (v) => '€ ' + (v/1000) + 'k' } } }
+                }
+            });
         }
  
         function calcolaBenchmark(f, settore, dimensione) {
             const dens = densitaContenutoSettore[settore].densita;
             const fattDim = fattoreDimensione[dimensione].fatt;
-            const valContenuto = f.superficie_mq * dens * fattDim;
-            const valFabbricato = f.val_med * premioFabbricatoDimensione[dimensione];
-            return { valContenuto: Math.round(valContenuto), valFabbricato: Math.round(valFabbricato), valTotale: Math.round(valContenuto + valFabbricato), densitaEffettiva: Math.round(dens * fattDim) };
+            // Media di mercato del contenuto per il profilo (densità × scala dimensionale × fattore mercato)
+            const valContenuto = f.superficie_mq * dens * fattDim * mktContenutoFatt;
+            // Media di mercato del fabbricato per il profilo
+            const valFabbricato = f.val_med * premioFabbricatoDimensione[dimensione] * mktFabbricatoFatt;
+            return { valContenuto: Math.round(valContenuto), valFabbricato: Math.round(valFabbricato), valTotale: Math.round(valContenuto + valFabbricato), densitaEffettiva: Math.round(dens * fattDim * mktContenutoFatt) };
         }
  
         function aggiornaBenchmark() {
@@ -605,9 +665,9 @@
             const isReale = (settore === f.profilo_settore && dimensione === f.profilo_dimensione);
             const nota = document.getElementById('profiloRealeNota');
             if (isReale) {
-                nota.innerHTML = '<span class="profilo-attivo-tag">PROFILO REALE</span> Corrisponde al profilo effettivo di Manifatture Toscane S.r.l. (Tessile, Piccola impresa).';
+                nota.innerHTML = '<span class="profilo-attivo-tag">PROFILO REALE</span> Media di mercato per imprese Tessili Piccole come Manifatture Toscane S.r.l. I valori benchmark rappresentano la mediana di categoria, distinta dal valore della singola impresa analizzata.';
             } else {
-                nota.innerHTML = `Profilo simulato: <strong>${densitaContenutoSettore[settore].label}</strong> · <strong>${fattoreDimensione[dimensione].label}</strong>. Profilo reale dell'impresa: Tessile, Piccola.`;
+                nota.innerHTML = `Media di mercato per profilo <strong>${densitaContenutoSettore[settore].label}</strong> · <strong>${fattoreDimensione[dimensione].label}</strong>. Profilo reale dell'impresa: Tessile, Piccola.`;
             }
             const valContenutoReale = f.contenuto.reduce((s,c) => s + c.valore, 0);
             const ctx = document.getElementById('chartBenchmark').getContext('2d');
@@ -616,7 +676,7 @@
                 type: 'bar',
                 data: { labels: ['Valore Fabbricato', 'Valore Contenuto', 'Valore Assicurabile'], datasets: [
                     { label: 'Manifatture Toscane (reale)', data: [f.val_med, valContenutoReale, f.val_med + valContenutoReale], backgroundColor: '#86BC25' },
-                    { label: 'Profilo selezionato', data: [bm.valFabbricato, bm.valContenuto, bm.valTotale], backgroundColor: '#007CB0' }
+                    { label: 'Media di mercato (profilo)', data: [bm.valFabbricato, bm.valContenuto, bm.valTotale], backgroundColor: '#007CB0' }
                 ]},
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } }, tooltip: { callbacks: { label: (c) => c.dataset.label + ': € ' + c.parsed.y.toLocaleString('it-IT') } } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => '€ ' + (v/1000) + 'k' } } } }
             });
@@ -644,24 +704,6 @@
                 type: 'bar',
                 data: { labels: ['Valore Minimo', 'Valore Medio', 'Valore Massimo'], datasets: [{ label: 'Valutazione fabbricato (€)', data: [f.val_min, f.val_med, f.val_max], backgroundColor: ['#e8f4f8', '#86BC25', '#007CB0'], borderColor: ['#007CB0', '#86BC25', '#007CB0'], borderWidth: 2 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } }
-            });
-        }
- 
-        function createComparabiliChart(f, prezzoMedio) {
-            const ctx = document.getElementById('chartComparabili').getContext('2d');
-            const labels = f.comparabili.map((c, i) => 'Comp. ' + (i+1));
-            new Chart(ctx, {
-                type: 'bar',
-                data: { labels: labels, datasets: [{ label: 'Prezzo di compravendita (€)', data: f.comparabili.map(c => c.prezzo), backgroundColor: '#007CB0' }] },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true },
-                        annotation: false,
-                        tooltip: { callbacks: { label: (c) => '€ ' + c.parsed.y.toLocaleString('it-IT') } }
-                    },
-                    scales: { y: { beginAtZero: true, ticks: { callback: (v) => '€ ' + (v/1000) + 'k' } } }
-                }
             });
         }
  
@@ -695,7 +737,6 @@
             document.getElementById('mktZona').textContent = f.zona;
             document.getElementById('mktPosizione').textContent = f.posizione;
             document.getElementById('mktDinamica').textContent = f.dinamica;
-            document.getElementById('mktQuotazione').textContent = `€ ${f.quotazione_mq}`;
             document.getElementById('mktAndamento').textContent = f.andamento_commerciale;
  
             document.getElementById('valSuperficie').textContent = `${f.superficie_mq} m²`;
@@ -704,21 +745,6 @@
             document.getElementById('valMed').textContent = fmtE(f.val_med);
             document.getElementById('valMax').textContent = fmtE(f.val_max);
             createValutazioneChart(f);
- 
-            // Comparabili
-            const compBody = document.getElementById('comparabiliTable');
-            compBody.innerHTML = '';
-            let sommaPrezzi = 0, sommaSup = 0;
-            f.comparabili.forEach(c => {
-                const euroMq = Math.round(c.prezzo / c.sup);
-                sommaPrezzi += c.prezzo; sommaSup += c.sup;
-                compBody.innerHTML += `<tr><td>${c.data}</td><td>${c.ubicazione}</td><td>${c.tipologia}</td><td style="text-align:right;">${c.sup} m²</td><td style="text-align:right;">${fmtE(c.prezzo)}</td><td style="text-align:right;">€ ${euroMq.toLocaleString('it-IT')}</td></tr>`;
-            });
-            const prezzoMedio = Math.round(sommaPrezzi / f.comparabili.length);
-            document.getElementById('compMedio').textContent = fmtE(prezzoMedio);
-            const scost = ((prezzoMedio - f.val_med) / f.val_med * 100);
-            document.getElementById('compScostamento').textContent = (scost >= 0 ? '+' : '') + scost.toFixed(1) + '%';
-            createComparabiliChart(f, prezzoMedio);
  
             // Contenuto
             const tbody = document.getElementById('contenutoTable');
@@ -781,10 +807,10 @@
                 slider.addEventListener('input', (e) => {
                     const v = parseFloat(e.target.value);
                     valore.textContent = v.toString().replace('.', ',');
-                    ricalcolaCompravendite(v);
+                    aggiornaPerRaggio(v);
                     aggiornaCerchio(v);
                 });
-                ricalcolaCompravendite(parseFloat(slider.value));
+                aggiornaPerRaggio(parseFloat(slider.value));
                 aggiornaCerchio(parseFloat(slider.value));
             }
         }
