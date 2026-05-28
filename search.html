@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ricerca Soggetto - Deloitte</title>
+    <title>Ricerca - Deloitte</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -40,6 +40,38 @@
             padding-bottom: 12px;
             border-bottom: 2px solid #86BC25;
         }
+        /* Toggle tipo ricerca */
+        .toggle-tipo {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .toggle-btn {
+            flex: 1;
+            padding: 16px 20px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #86BC25 0%, #007CB0 100%);
+            color: white;
+        }
+        .toggle-btn:not(.active):hover { background: #f5f5f5; }
+        .toggle-icon { font-size: 22px; }
+
         .form-group {
             display: flex;
             gap: 12px;
@@ -69,10 +101,7 @@
             transition: border-color 0.2s;
             text-transform: uppercase;
         }
-        .form-input:focus {
-            outline: none;
-            border-color: #007CB0;
-        }
+        .form-input:focus { outline: none; border-color: #007CB0; }
         .btn {
             padding: 12px 28px;
             border: none;
@@ -89,22 +118,20 @@
             background: linear-gradient(135deg, #86BC25 0%, #007CB0 100%);
             color: white;
         }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(134, 188, 37, 0.3);
-        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(134, 188, 37, 0.3); }
         .breadcrumb {
             max-width: 900px;
             margin: 0 auto 40px;
             font-size: 13px;
             color: #666666;
         }
-        .breadcrumb a {
-            color: #007CB0;
-            text-decoration: none;
-        }
+        .breadcrumb a { color: #007CB0; text-decoration: none; }
         .breadcrumb a:hover { text-decoration: underline; }
-
+        .hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
         .error-msg {
             background-color: #f8d7da;
             border-left: 4px solid #D32F2F;
@@ -134,16 +161,8 @@
             letter-spacing: 0.5px;
             margin-bottom: 6px;
         }
-        .soggetto-nome {
-            font-size: 18px;
-            font-weight: 700;
-            color: #000;
-        }
-        .soggetto-dettagli {
-            font-size: 13px;
-            color: #666;
-            margin-top: 4px;
-        }
+        .soggetto-nome { font-size: 18px; font-weight: 700; color: #000; }
+        .soggetto-dettagli { font-size: 13px; color: #666; margin-top: 4px; }
 
         .proprieta-titolo {
             font-size: 14px;
@@ -171,28 +190,12 @@
             box-shadow: 0 4px 12px rgba(134, 188, 37, 0.15);
             transform: translateY(-1px);
         }
-        .proprieta-card.censita {
-            border-left: 4px solid #86BC25;
-        }
-        .proprieta-card.non-censita {
-            border-left: 4px solid #BDBDBD;
-            opacity: 0.85;
-        }
-        .proprieta-icon {
-            font-size: 32px;
-            line-height: 1;
-        }
+        .proprieta-card.censita { border-left: 4px solid #86BC25; }
+        .proprieta-card.non-censita { border-left: 4px solid #BDBDBD; opacity: 0.85; }
+        .proprieta-icon { font-size: 32px; line-height: 1; }
         .proprieta-info { flex: 1; }
-        .proprieta-indirizzo {
-            font-size: 15px;
-            font-weight: 600;
-            color: #000;
-            margin-bottom: 4px;
-        }
-        .proprieta-dati {
-            font-size: 12px;
-            color: #666;
-        }
+        .proprieta-indirizzo { font-size: 15px; font-weight: 600; color: #000; margin-bottom: 4px; }
+        .proprieta-dati { font-size: 12px; color: #666; }
         .proprieta-badge {
             font-size: 10px;
             font-weight: 700;
@@ -201,21 +204,15 @@
             padding: 5px 10px;
             border-radius: 12px;
         }
-        .proprieta-badge.censita {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-        .proprieta-badge.non-censita {
-            background-color: #f5f5f5;
-            color: #757575;
-        }
+        .proprieta-badge.censita { background-color: #e8f5e9; color: #2e7d32; }
+        .proprieta-badge.non-censita { background-color: #f5f5f5; color: #757575; }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-content">
             <div class="header-title">Ricerca Soggetto</div>
-            <div class="header-subtitle">Inserire il codice fiscale per visualizzare il patrimonio immobiliare</div>
+            <div class="header-subtitle">Persona fisica (Codice Fiscale) o impresa (Partita IVA)</div>
         </div>
     </div>
 
@@ -226,18 +223,30 @@
     <div class="container">
         <div class="form-card">
             <div class="section-title">Identificazione Soggetto</div>
+
+            <div class="toggle-tipo">
+                <button class="toggle-btn active" id="btnPF" onclick="cambiaTipo('pf')">
+                    <span class="toggle-icon">👤</span> Persona Fisica
+                </button>
+                <button class="toggle-btn" id="btnPG" onclick="cambiaTipo('pg')">
+                    <span class="toggle-icon">🏢</span> Impresa
+                </button>
+            </div>
+
             <div class="form-group">
                 <div class="form-field">
-                    <label class="form-label" for="codiceFiscale">Codice Fiscale</label>
-                    <input type="text" id="codiceFiscale" class="form-input" maxlength="16" placeholder="RSSMRA78C15H501Z">
+                    <label class="form-label" for="codiceRicerca" id="labelRicerca">Codice Fiscale</label>
+                    <input type="text" id="codiceRicerca" class="form-input" maxlength="16" placeholder="RSSMRA78C15H501Z">
                 </div>
                 <button class="btn btn-primary" id="cercaBtn">Cerca</button>
             </div>
-            <div class="error-msg" id="errorMsg">Codice fiscale non trovato. Riprovare.</div>
+            <div class="hint" id="hintRicerca">Inserire il codice fiscale del soggetto (16 caratteri).</div>
+
+            <div class="error-msg" id="errorMsg">Codice non trovato. Riprovare.</div>
 
             <div id="risultatiContainer" style="display: none;">
                 <div class="soggetto-info">
-                    <div class="soggetto-label">Soggetto individuato</div>
+                    <div class="soggetto-label" id="soggettoLabelTipo">Soggetto individuato</div>
                     <div class="soggetto-nome" id="soggettoNome">-</div>
                     <div class="soggetto-dettagli" id="soggettoDettagli">-</div>
                 </div>
@@ -249,125 +258,149 @@
     </div>
 
     <script>
-        // Base dati soggetti e proprietà associate
-        const soggetti = {
+        let tipoRicerca = 'pf';
+
+        // ====== PERSONE FISICHE (ricerca per Codice Fiscale) ======
+        const soggettiPF = {
             'RSSMRA78C15H501Z': {
                 nome: 'ROSSI Mario',
                 nato: 'Norcia (PG)',
                 dataNascita: '15/03/1978',
                 proprieta: [
                     {
-                        immobile_id: 1,
-                        censita: true,
-                        via: 'Via Circonvallazione',
-                        civico: '44',
-                        cap: '06046',
-                        citta: 'Norcia',
-                        provincia: 'PG',
-                        scala: 'A',
-                        piano: '3',
-                        numeroAppartamento: '5',
-                        interno: '1',
-                        tipologia: 'Appartamento',
-                        superficie: '100 m²',
-                        categoria: 'A/2'
+                        immobile_id: 1, censita: true,
+                        via: 'Via Circonvallazione', civico: '44', cap: '06046', citta: 'Norcia', provincia: 'PG',
+                        scala: 'A', piano: '3', numeroAppartamento: '5', interno: '1',
+                        tipologia: 'Appartamento', superficie: '100 m²', categoria: 'A/2'
                     },
                     {
-                        immobile_id: 99,
-                        censita: false,
-                        via: 'Via dei Fori Imperiali',
-                        civico: '12',
-                        cap: '00184',
-                        citta: 'Roma',
-                        provincia: 'RM',
-                        scala: 'B',
-                        piano: '2',
-                        numeroAppartamento: '4',
-                        interno: '3',
-                        tipologia: 'Appartamento',
-                        superficie: '85 m²',
-                        categoria: 'A/3'
+                        immobile_id: 99, censita: false,
+                        via: 'Via dei Fori Imperiali', civico: '12', cap: '00184', citta: 'Roma', provincia: 'RM',
+                        scala: 'B', piano: '2', numeroAppartamento: '4', interno: '3',
+                        tipologia: 'Appartamento', superficie: '85 m²', categoria: 'A/3'
                     },
                     {
-                        immobile_id: 98,
-                        censita: false,
-                        via: 'Via Garibaldi',
-                        civico: '7',
-                        cap: '06121',
-                        citta: 'Perugia',
-                        provincia: 'PG',
-                        scala: '-',
-                        piano: 'Terra',
-                        numeroAppartamento: '-',
-                        interno: '-',
-                        tipologia: 'Box auto',
-                        superficie: '18 m²',
-                        categoria: 'C/6'
+                        immobile_id: 98, censita: false,
+                        via: 'Via Garibaldi', civico: '7', cap: '06121', citta: 'Perugia', provincia: 'PG',
+                        scala: '-', piano: 'Terra', numeroAppartamento: '-', interno: '-',
+                        tipologia: 'Box auto', superficie: '18 m²', categoria: 'C/6'
                     },
                     {
-                        immobile_id: 97,
-                        censita: false,
-                        via: 'Strada Provinciale 477',
-                        civico: 'snc',
-                        cap: '06046',
-                        citta: 'Castelluccio di Norcia',
-                        provincia: 'PG',
-                        scala: '-',
-                        piano: 'Terra',
-                        numeroAppartamento: '-',
-                        interno: '-',
-                        tipologia: 'Terreno agricolo',
-                        superficie: '4.500 m²',
-                        categoria: 'Seminativo'
+                        immobile_id: 97, censita: false,
+                        via: 'Strada Provinciale 477', civico: 'snc', cap: '06046', citta: 'Castelluccio di Norcia', provincia: 'PG',
+                        scala: '-', piano: 'Terra', numeroAppartamento: '-', interno: '-',
+                        tipologia: 'Terreno agricolo', superficie: '4.500 m²', categoria: 'Seminativo'
+                    }
+                ]
+            }
+        };
+
+        // ====== IMPRESE (ricerca per Partita IVA) ======
+        const soggettiPG = {
+            '02134560468': {
+                nome: 'Manifatture Toscane S.r.l.',
+                formaGiuridica: 'Società a responsabilità limitata',
+                sede: 'Lucca (LU)',
+                atecoDesc: 'C13.20 - Tessitura',
+                proprieta: [
+                    {
+                        immobile_id: 'C1', censita: true,
+                        via: 'Via Dante Alighieri', civico: '120', cap: '55100', citta: 'Lucca', provincia: 'LU',
+                        tipologia: 'Capannone industriale', superficie: '500 m²', categoria: 'D/1',
+                        destinazione: 'Produttiva'
+                    },
+                    {
+                        immobile_id: 'C99', censita: false,
+                        via: 'Via dell\'Industria', civico: '8', cap: '50145', citta: 'Firenze', provincia: 'FI',
+                        tipologia: 'Magazzino logistico', superficie: '320 m²', categoria: 'D/8',
+                        destinazione: 'Deposito'
+                    },
+                    {
+                        immobile_id: 'C98', censita: false,
+                        via: 'Viale Europa', civico: '45', cap: '55049', citta: 'Viareggio', provincia: 'LU',
+                        tipologia: 'Ufficio direzionale', superficie: '140 m²', categoria: 'A/10',
+                        destinazione: 'Uffici'
                     }
                 ]
             }
         };
 
         const cercaBtn = document.getElementById('cercaBtn');
-        const cfInput = document.getElementById('codiceFiscale');
+        const codiceInput = document.getElementById('codiceRicerca');
         const errorMsg = document.getElementById('errorMsg');
         const risultatiContainer = document.getElementById('risultatiContainer');
 
-        cercaBtn.addEventListener('click', cercaSoggetto);
-        cfInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') cercaSoggetto();
-        });
+        function cambiaTipo(tipo) {
+            tipoRicerca = tipo;
+            document.getElementById('btnPF').classList.toggle('active', tipo === 'pf');
+            document.getElementById('btnPG').classList.toggle('active', tipo === 'pg');
+            const label = document.getElementById('labelRicerca');
+            const hint = document.getElementById('hintRicerca');
+            const input = document.getElementById('codiceRicerca');
 
-        function cercaSoggetto() {
-            const cf = cfInput.value.trim().toUpperCase();
+            if (tipo === 'pf') {
+                label.textContent = 'Codice Fiscale';
+                hint.textContent = 'Inserire il codice fiscale del soggetto (16 caratteri).';
+                input.placeholder = 'RSSMRA78C15H501Z';
+                input.maxLength = 16;
+            } else {
+                label.textContent = 'Partita IVA';
+                hint.textContent = 'Inserire la partita IVA dell\'impresa (11 cifre).';
+                input.placeholder = '02134560468';
+                input.maxLength = 11;
+            }
+            input.value = '';
+            errorMsg.classList.remove('show');
+            risultatiContainer.style.display = 'none';
+        }
+
+        cercaBtn.addEventListener('click', cerca);
+        codiceInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') cerca(); });
+
+        function cerca() {
+            const codice = codiceInput.value.trim().toUpperCase();
             errorMsg.classList.remove('show');
             risultatiContainer.style.display = 'none';
 
-            if (!cf) {
-                errorMsg.textContent = 'Inserire un codice fiscale.';
+            if (!codice) {
+                errorMsg.textContent = tipoRicerca === 'pf' ? 'Inserire un codice fiscale.' : 'Inserire una partita IVA.';
                 errorMsg.classList.add('show');
                 return;
             }
 
-            const soggetto = soggetti[cf];
-            if (!soggetto) {
-                errorMsg.textContent = 'Codice fiscale non trovato nel sistema.';
-                errorMsg.classList.add('show');
-                return;
+            if (tipoRicerca === 'pf') {
+                const soggetto = soggettiPF[codice];
+                if (!soggetto) {
+                    errorMsg.textContent = 'Codice fiscale non trovato nel sistema.';
+                    errorMsg.classList.add('show');
+                    return;
+                }
+                mostraRisultatiPF(codice, soggetto);
+            } else {
+                const soggetto = soggettiPG[codice];
+                if (!soggetto) {
+                    errorMsg.textContent = 'Partita IVA non trovata nel sistema.';
+                    errorMsg.classList.add('show');
+                    return;
+                }
+                mostraRisultatiPG(codice, soggetto);
             }
+        }
 
-            // Popola dati soggetto
+        function mostraRisultatiPF(cf, soggetto) {
+            document.getElementById('soggettoLabelTipo').textContent = 'Soggetto individuato (persona fisica)';
             document.getElementById('soggettoNome').textContent = soggetto.nome;
             document.getElementById('soggettoDettagli').textContent =
                 `CF: ${cf} · Nato a ${soggetto.nato} il ${soggetto.dataNascita}`;
             document.getElementById('numProprieta').textContent = soggetto.proprieta.length;
 
-            // Popola lista proprietà
             const lista = document.getElementById('listaProprieta');
             lista.innerHTML = '';
-
             const iconaTipo = (tipo) => {
                 if (tipo === 'Box auto') return '🚗';
                 if (tipo === 'Terreno agricolo') return '🌾';
                 return '🏠';
             };
-
             soggetto.proprieta.forEach(p => {
                 const card = document.createElement('div');
                 card.className = 'proprieta-card ' + (p.censita ? 'censita' : 'non-censita');
@@ -381,21 +414,61 @@
                         ${p.censita ? '✓ Censita' : 'Non censita'}
                     </div>
                 `;
-                card.addEventListener('click', () => apriProprieta(p));
+                card.addEventListener('click', () => apriProprietaPF(p));
                 lista.appendChild(card);
             });
-
             risultatiContainer.style.display = 'block';
         }
 
-        function apriProprieta(p) {
+        function mostraRisultatiPG(piva, soggetto) {
+            document.getElementById('soggettoLabelTipo').textContent = 'Impresa individuata';
+            document.getElementById('soggettoNome').textContent = soggetto.nome;
+            document.getElementById('soggettoDettagli').textContent =
+                `P.IVA: ${piva} · ${soggetto.formaGiuridica} · Sede ${soggetto.sede} · ATECO ${soggetto.atecoDesc}`;
+            document.getElementById('numProprieta').textContent = soggetto.proprieta.length;
+
+            const lista = document.getElementById('listaProprieta');
+            lista.innerHTML = '';
+            const iconaTipo = (tipo) => {
+                if (tipo.includes('Magazzino')) return '📦';
+                if (tipo.includes('Ufficio')) return '🏢';
+                return '🏭';
+            };
+            soggetto.proprieta.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'proprieta-card ' + (p.censita ? 'censita' : 'non-censita');
+                card.innerHTML = `
+                    <div class="proprieta-icon">${iconaTipo(p.tipologia)}</div>
+                    <div class="proprieta-info">
+                        <div class="proprieta-indirizzo">${p.via}, ${p.civico} — ${p.citta} (${p.provincia})</div>
+                        <div class="proprieta-dati">${p.tipologia} · Cat. ${p.categoria} · ${p.superficie} · ${p.destinazione}</div>
+                    </div>
+                    <div class="proprieta-badge ${p.censita ? 'censita' : 'non-censita'}">
+                        ${p.censita ? '✓ Censito' : 'Non censito'}
+                    </div>
+                `;
+                card.addEventListener('click', () => apriProprietaPG(p));
+                lista.appendChild(card);
+            });
+            risultatiContainer.style.display = 'block';
+        }
+
+        function apriProprietaPF(p) {
             if (!p.censita) {
                 alert(`L'immobile in ${p.via}, ${p.civico} — ${p.citta} non è ancora stato censito nel sistema di valutazione.\n\nContattare l'ufficio tecnico per richiedere il censimento.`);
                 return;
             }
-            // Salva i dati immobile in sessionStorage per results.html
             sessionStorage.setItem('immobileData', JSON.stringify(p));
             window.location.href = 'results.html';
+        }
+
+        function apriProprietaPG(p) {
+            if (!p.censita) {
+                alert(`L'immobile strumentale in ${p.via}, ${p.civico} — ${p.citta} non è ancora stato censito nel sistema di valutazione corporate.\n\nContattare l'ufficio tecnico per richiedere il censimento.`);
+                return;
+            }
+            sessionStorage.setItem('immobileCorporateData', JSON.stringify(p));
+            window.location.href = 'results-corporate.html';
         }
     </script>
 </body>
