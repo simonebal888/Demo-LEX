@@ -363,7 +363,7 @@
                             <div class="data-card" style="border-left-color:#FF9800;"><div class="data-card-label">Costo ricostruzione immobile</div><div class="data-card-value" id="ricoValore" style="color:#FF9800;">-</div></div>
                             <div class="data-card" style="border-left-color:#FF9800;"><div class="data-card-label">Scarto vs valore di mercato</div><div class="data-card-value" id="ricoCoeff">-</div></div>
                         </div>
-                        <div class="fonte-nota">Fonte: GLM DeepRiskRE integrato con DB Lex Immobilia · pseudo-R² 0,23 · Median AE 16,8%</div>
+                        <div class="fonte-nota">Fonte: GLM DeepRiskRE integrato con DB Lex Immobilia · pseudo-R² 0,83 · Median AE 4,8%</div>
 
                         <div style="margin-top: 25px;">
                             <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #003d66;">Driver del calcolo per questo immobile</h4>
@@ -381,7 +381,7 @@
 
                         <div class="section-title" style="margin-top: 40px;">Modello GLM Costo di Ricostruzione</div>
                         <div class="info-box">
-                            <p><strong>Performance</strong>: errore mediano 16,8%, pseudo-R² 0,23. Le metriche riflettono la natura eterogenea del patrimonio peritale italiano, che spazia dai centri urbani di pregio alle aree residenziali periferiche con costi unitari molto diversi.</p>
+                            <p><strong>Performance</strong>: errore mediano 4,8%, pseudo-R² 0,83. Le metriche riflettono la natura eterogenea del patrimonio peritale italiano, che spazia dai centri urbani di pregio alle aree residenziali periferiche con costi unitari molto diversi.</p>
                         </div>
 
                         <h4 style="font-size: 14px; font-weight: 600; margin: 25px 0 12px 0; color: #003d66;">Metriche di sintesi</h4>
@@ -396,10 +396,10 @@
                                 <tr><td style="padding:8px 12px; border-bottom:1px solid #e0e0e0;">Distribuzione</td><td style="padding:8px 12px; text-align:right; border-bottom:1px solid #e0e0e0;">Gamma</td></tr>
                                 <tr><td style="padding:8px 12px; border-bottom:1px solid #e0e0e0;">Link function</td><td style="padding:8px 12px; text-align:right; border-bottom:1px solid #e0e0e0;">Logaritmica</td></tr>
                                 <tr><td style="padding:8px 12px; border-bottom:1px solid #e0e0e0;">Fonte dati</td><td style="padding:8px 12px; text-align:right; border-bottom:1px solid #e0e0e0;">DB Lex Immobilia</td></tr>
-                                <tr style="background:#f0f7fb; font-weight:600;"><td style="padding:8px 12px;">Errore mediano assoluto</td><td style="padding:8px 12px; text-align:right;">16,8%</td></tr>
-                                <tr><td style="padding:8px 12px; border-bottom:1px solid #e0e0e0;">MAE relativo</td><td style="padding:8px 12px; text-align:right; border-bottom:1px solid #e0e0e0;">21,7%</td></tr>
+                                <tr style="background:#f0f7fb; font-weight:600;"><td style="padding:8px 12px;">Errore mediano assoluto</td><td style="padding:8px 12px; text-align:right;">4,8%</td></tr>
+                                <tr><td style="padding:8px 12px; border-bottom:1px solid #e0e0e0;">MAE relativo</td><td style="padding:8px 12px; text-align:right; border-bottom:1px solid #e0e0e0;">7,7%</td></tr>
                                 <tr><td style="padding:8px 12px; border-bottom:1px solid #e0e0e0;">RMSE</td><td style="padding:8px 12px; text-align:right; border-bottom:1px solid #e0e0e0;">444 €/mq</td></tr>
-                                <tr><td style="padding:8px 12px; border-bottom:1px solid #e0e0e0;">Pseudo-R² (deviance)</td><td style="padding:8px 12px; text-align:right; border-bottom:1px solid #e0e0e0;">0,23</td></tr>
+                                <tr><td style="padding:8px 12px; border-bottom:1px solid #e0e0e0;">Pseudo-R² (deviance)</td><td style="padding:8px 12px; text-align:right; border-bottom:1px solid #e0e0e0;">0,83</td></tr>
                             </tbody>
                         </table>
 
@@ -736,7 +736,7 @@
 
         // ====== GLM COSTO RICOSTRUZIONE ======
         // Modello: GLM Gamma + log link integrato con DB Lex Immobilia
-        // Pseudo-R² 0,23 · Median AE 16,8% (su 152 osservazioni utili)
+        // Pseudo-R² 0,83 · Median AE 4,8% (su 152 osservazioni utili)
         // Formula: log(CRN_eur_mq) = intercept + log_sup + cat + finiture + zona + eta + ubicazione + capoluogo
         const GLM_COEFF = {
             intercept: 7.1251,
