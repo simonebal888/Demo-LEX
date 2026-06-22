@@ -377,6 +377,92 @@
                                 </thead>
                                 <tbody id="glmDriversTable"></tbody>
                             </table>
+
+                        <div style="margin-top: 30px;">
+    <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #003d66;">Simulatore: come cambia il CRN al variare delle caratteristiche</h4>
+    <div style="background: #f9f9f9; border-radius: 8px; padding: 20px; border: 1px solid #e0e0e0;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+            <div>
+                <div style="font-size: 12px; font-weight: 600; color: #003d66; margin-bottom: 12px;">PARAMETRI DELL'IMMOBILE</div>
+                <div style="display: grid; gap: 12px;">
+                    <div>
+                        <label style="font-size: 12px; color: #555; display: block; margin-bottom: 4px;">Superficie commerciale (mq)</label>
+                        <input type="range" id="simSup" min="40" max="400" value="100" step="5" style="width: 100%;" oninput="document.getElementById('simSupVal').textContent = this.value + ' mq'; aggiornaSimulatore();">
+                        <div style="font-size: 13px; font-weight: 600; color: #FF9800;" id="simSupVal">100 mq</div>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #555; display: block; margin-bottom: 4px;">Categoria catastale</label>
+                        <select id="simCat" onchange="aggiornaSimulatore()" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;">
+                            <option value="civile" selected>civile</option>
+                            <option value="signorile">signorile</option>
+                            <option value="economico">economico</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #555; display: block; margin-bottom: 4px;">Qualità finiture</label>
+                        <select id="simFin" onchange="aggiornaSimulatore()" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;">
+                            <option value="Insufficiente">Insufficiente</option>
+                            <option value="Sufficiente" selected>Sufficiente</option>
+                            <option value="Buono">Buono</option>
+                            <option value="Ottimo">Ottimo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #555; display: block; margin-bottom: 4px;">Macro-zona</label>
+                        <select id="simZona" onchange="aggiornaSimulatore()" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;">
+                            <option value="Nord">Nord</option>
+                            <option value="Centro" selected>Centro</option>
+                            <option value="Sud">Sud</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #555; display: block; margin-bottom: 4px;">Classe di età</label>
+                        <select id="simEta" onchange="aggiornaSimulatore()" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;">
+                            <option value="recente">recente (&lt;20 anni)</option>
+                            <option value="media">media (20-50 anni)</option>
+                            <option value="vecchio" selected>vecchio (&gt;50 anni)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #555; display: block; margin-bottom: 4px;">Ubicazione</label>
+                        <select id="simUbic" onchange="aggiornaSimulatore()" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;">
+                            <option value="Centrale" selected>Centrale</option>
+                            <option value="Semicentrale">Semicentrale</option>
+                            <option value="Periferica">Periferica</option>
+                            <option value="Centro storico">Centro storico</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #555; display: block; margin-bottom: 4px;">Capoluogo di provincia</label>
+                        <select id="simCap" onchange="aggiornaSimulatore()" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;">
+                            <option value="0" selected>No</option>
+                            <option value="1">Sì</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div style="font-size: 12px; font-weight: 600; color: #003d66; margin-bottom: 12px;">STIMA</div>
+                <div style="background: white; border-radius: 6px; padding: 18px; border-left: 4px solid #FF9800;">
+                    <div style="font-size: 11px; color: #888; margin-bottom: 4px;">Costo di ricostruzione €/mq</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #003d66;" id="simEuroMq">€ 1.215</div>
+                    <div style="font-size: 11px; color: #888; margin-top: 14px; margin-bottom: 4px;">Costo di ricostruzione totale</div>
+                    <div style="font-size: 24px; font-weight: 700; color: #FF9800;" id="simTotale">€ 121.500</div>
+                    <div style="font-size: 12px; color: #555; margin-top: 14px; padding-top: 14px; border-top: 1px solid #e0e0e0;">
+                        <span id="simConfronto" style="font-weight: 600;">— scenario base</span>
+                    </div>
+                </div>
+                <div style="margin-top: 16px;">
+                    <div style="font-size: 12px; font-weight: 600; color: #003d66; margin-bottom: 8px;">Decomposizione</div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                        <tbody id="simDriversTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>    
+                            
                         </div>
 
                         <div class="section-title" style="margin-top: 40px;">Modello GLM Costo di Ricostruzione</div>
@@ -1625,6 +1711,74 @@
         document.getElementById('chatbotClose').addEventListener('click', () => document.getElementById('chatbotPanel').classList.remove('show'));
 
         window.addEventListener('load', loadData);
+
+// === SIMULATORE INTERATTIVO CRN ===
+const CRN_BASE_NORCIA = 1215;  // valore del caso base per il confronto
+
+function aggiornaSimulatore() {
+    const sup = parseFloat(document.getElementById('simSup').value);
+    const cat = document.getElementById('simCat').value;
+    const fin = document.getElementById('simFin').value;
+    const zona = document.getElementById('simZona').value;
+    const eta = document.getElementById('simEta').value;
+    const ubic = document.getElementById('simUbic').value;
+    const cap = parseInt(document.getElementById('simCap').value);
+
+    const logSup = Math.log(sup / 100);
+    const linpred = GLM_COEFF.intercept
+        + GLM_COEFF.log_sup * logSup
+        + GLM_COEFF.cat[cat]
+        + GLM_COEFF.finiture[fin]
+        + GLM_COEFF.zona[zona]
+        + GLM_COEFF.eta[eta]
+        + GLM_COEFF.ubicazione[ubic]
+        + GLM_COEFF.capoluogo * cap;
+    const euroMq = Math.exp(linpred);
+    const totale = euroMq * sup;
+
+    document.getElementById('simEuroMq').textContent = '€ ' + Math.round(euroMq).toLocaleString('it-IT');
+    document.getElementById('simTotale').textContent = '€ ' + Math.round(totale).toLocaleString('it-IT');
+
+    const diff = ((euroMq - CRN_BASE_NORCIA) / CRN_BASE_NORCIA) * 100;
+    const conf = document.getElementById('simConfronto');
+    if (Math.abs(diff) < 0.5) {
+        conf.textContent = '— scenario base';
+        conf.style.color = '#555';
+    } else {
+        const segno = diff >= 0 ? '+' : '';
+        conf.textContent = segno + diff.toFixed(1) + '% vs scenario base Norcia';
+        conf.style.color = diff >= 0 ? '#86BC25' : '#D32F2F';
+    }
+
+    const drivers = [
+        { d: 'Baseline', v: '€ ' + Math.round(Math.exp(GLM_COEFF.intercept)).toLocaleString('it-IT') + '/mq', e: '—' },
+        { d: 'Superficie', v: sup + ' mq', e: fmtPct(Math.exp(GLM_COEFF.log_sup * logSup)) },
+        { d: 'Categoria', v: cat, e: fmtPct(Math.exp(GLM_COEFF.cat[cat])) },
+        { d: 'Finiture', v: fin, e: fmtPct(Math.exp(GLM_COEFF.finiture[fin])) },
+        { d: 'Macro-zona', v: zona, e: fmtPct(Math.exp(GLM_COEFF.zona[zona])) },
+        { d: 'Età', v: eta, e: fmtPct(Math.exp(GLM_COEFF.eta[eta])) },
+        { d: 'Ubicazione', v: ubic, e: fmtPct(Math.exp(GLM_COEFF.ubicazione[ubic])) },
+        { d: 'Capoluogo', v: cap ? 'Sì' : 'No', e: fmtPct(Math.exp(GLM_COEFF.capoluogo * cap)) }
+    ];
+
+    const tbody = document.getElementById('simDriversTable');
+    tbody.innerHTML = '';
+    drivers.forEach((dr, i) => {
+        const bg = i % 2 === 0 ? '' : 'background:#f9f9f9;';
+        const color = dr.e.startsWith('+') ? '#86BC25' : (dr.e.startsWith('-') ? '#D32F2F' : '#666');
+        tbody.innerHTML += `<tr style="${bg}">
+            <td style="padding:6px 8px; border-bottom:1px solid #eee;">${dr.d}</td>
+            <td style="padding:6px 8px; border-bottom:1px solid #eee; color:#555;">${dr.v}</td>
+            <td style="padding:6px 8px; border-bottom:1px solid #eee; text-align:right; color:${color}; font-weight:600;">${dr.e}</td>
+        </tr>`;
+    });
+}
+
+// Avvia il simulatore al caricamento
+document.addEventListener('DOMContentLoaded', aggiornaSimulatore);
+// E lo chiamo subito anche qui in caso il DOMContentLoaded sia già passato
+if (document.readyState !== 'loading') aggiornaSimulatore();
+        
     </script>
 </body>
 </html>
