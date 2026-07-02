@@ -571,6 +571,7 @@
                         <button class="tab-button" onclick="switchTab(event, 'tab-alluvione')">Alluvione</button>
                         <button class="tab-button" onclick="switchTab(event, 'tab-sisma')">Sisma</button>
                         <button class="tab-button" onclick="switchTab(event, 'tab-frane')">Frane</button>
+                        <button class="tab-button" onclick="switchTab(event, 'tab-clima-futuro')">Rischio Climatico Futuro</button>
                     </div>
 
                     <div id="tab-pendenza" class="tab-content active">
@@ -651,6 +652,68 @@
                             <div class="info-box" id="legenda2StoricoFrane" style="background-color: #C8E6C9; border-left-color: #4CAF50;">-</div>
                             <div style="margin-bottom: 30px; margin-top: 20px;"><h5 style="font-size: 14px; font-weight: 600; margin-bottom: 15px; color: #003d66;">Dettagli Eventi</h5><div class="info-box" id="dettagliStoricoFrane">-</div></div>
                         </div>
+                    </div>
+
+                    <div id="tab-clima-futuro" class="tab-content">
+                        <div class="section-title">Rischio Climatico Futuro (Proiezioni)</div>
+                        <div class="info-box" style="background-color:#f0f7ff; border-left-color:#007CB0;">
+                            <p>Questa sezione mostra <strong>proiezioni climatiche</strong>, non previsioni di eventi specifici. I dati derivano da modelli climatici (famiglia CMIP6, distribuiti da Copernicus Climate Change Service) che stimano come cambia la statistica del clima — non il meteo di un giorno preciso — in base a diversi scenari di emissione futuri.</p>
+                        </div>
+
+                        <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:30px; background:#f9f9f9; padding:20px; border-radius:6px;">
+                            <div style="flex:1; min-width:220px;">
+                                <label style="font-size:12px; font-weight:600; color:#666; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">Scenario di emissione</label>
+                                <select id="climaScenarioSelect" onchange="aggiornaClimaFuturo()" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                                    <option value="ssp126">Basso (SSP1-2.6) — mitigazione forte</option>
+                                    <option value="ssp245" selected>Medio (SSP2-4.5) — traiettoria intermedia</option>
+                                    <option value="ssp585">Alto (SSP5-8.5) — emissioni elevate</option>
+                                </select>
+                            </div>
+                            <div style="flex:1; min-width:220px;">
+                                <label style="font-size:12px; font-weight:600; color:#666; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">Orizzonte temporale</label>
+                                <select id="climaPeriodoSelect" onchange="aggiornaClimaFuturo()" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                                    <option value="2050">2041–2060</option>
+                                    <option value="2080">2081–2100</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="data-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                            <div class="data-card" style="border-left-color:#D32F2F;">
+                                <div class="data-card-label">Anomalia Temperatura Media</div>
+                                <div class="data-card-value" id="climaAnomaliaTemp" style="color:#D32F2F;">-</div>
+                                <div style="font-size:11px; color:#888; margin-top:6px;">rispetto al periodo 1995–2014</div>
+                            </div>
+                            <div class="data-card" style="border-left-color:#FF9800;">
+                                <div class="data-card-label">Giorni/Anno &gt; 35°C</div>
+                                <div class="data-card-value" id="climaGiorniCaldi" style="color:#FF9800;">-</div>
+                                <div style="font-size:11px; color:#888; margin-top:6px;">variazione attesa</div>
+                            </div>
+                            <div class="data-card" style="border-left-color:#007CB0;">
+                                <div class="data-card-label">Precipitazioni Estreme</div>
+                                <div class="data-card-value" id="climaPrecipEstreme" style="color:#007CB0;">-</div>
+                                <div style="font-size:11px; color:#888; margin-top:6px;">variazione intensità eventi &gt;95° percentile</div>
+                            </div>
+                            <div class="data-card" style="border-left-color:#86BC25;">
+                                <div class="data-card-label">Confidenza Modelli</div>
+                                <div class="data-card-value" id="climaConfidenza" style="color:#86BC25;">-</div>
+                                <div style="font-size:11px; color:#888; margin-top:6px;">accordo tra i modelli dell'ensemble</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:30px;">
+                            <h4 style="font-size:14px; font-weight:600; margin-bottom:15px; color:#003d66;">Andamento Storico e Proiezione (con banda di incertezza)</h4>
+                            <div class="chart-container">
+                                <canvas id="chartClimaFuturo"></canvas>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:30px;">
+                            <h4 style="font-size:14px; font-weight:600; margin-bottom:15px; color:#003d66;">Possibile Evoluzione dei Rischi Attuali</h4>
+                            <div class="info-box" id="climaImpattoRischi" style="background-color:#fff3cd; border-left-color:#FBC02D;">-</div>
+                        </div>
+
+                        <div class="fonte-nota">Dati illustrativi a fini dimostrativi. In produzione: ERA5 (storico) + CMIP6/CORDEX (proiezioni) via Copernicus Climate Data Store, elaborati offline e aggregati sull'area dell'immobile.</div>
                     </div>
                 </div>
             </div>
@@ -1163,6 +1226,7 @@
             }
 
             loadRischiData();
+            aggiornaClimaFuturo();
             createCopertureRadar();
             caricaMeteo();
 
@@ -1305,6 +1369,111 @@
             svg.appendChild(circle);
         }
 
+        // ====== RISCHIO CLIMATICO FUTURO (PROIEZIONI) ======
+        const climaFuturoData = {
+            ssp126: {
+                2050: { anomaliaTemp: "+1.0°C", giorniCaldi: "+8 giorni", precipEstreme: "+6%", confidenza: "Alta",
+                    impatto: "Nello scenario a basse emissioni l'aumento delle temperature resta contenuto. Il rischio alluvionale e franoso attuale non cambia in modo sostanziale, ma un lieve aumento delle piogge intense può accentuare localmente il rischio idrogeologico già rilevato nella zona." },
+                2080: { anomaliaTemp: "+1.3°C", giorniCaldi: "+12 giorni", precipEstreme: "+9%", confidenza: "Media",
+                    impatto: "Anche nello scenario ottimistico, nel lungo periodo si osserva un moderato incremento di ondate di calore. L'esposizione a frane e alluvioni resta prossima ai livelli attuali." }
+            },
+            ssp245: {
+                2050: { anomaliaTemp: "+1.6°C", giorniCaldi: "+15 giorni", precipEstreme: "+11%", confidenza: "Alta",
+                    impatto: "Aumento moderato di ondate di calore e di eventi di pioggia intensa. Data la pericolosità da frana già presente nell'area, un incremento delle piogge intense può aumentare la frequenza di piccoli dissesti superficiali." },
+                2080: { anomaliaTemp: "+2.4°C", giorniCaldi: "+26 giorni", precipEstreme: "+17%", confidenza: "Media",
+                    impatto: "Nello scenario intermedio a fine secolo, l'aumento delle temperature e della piovosità intensa potrebbe accentuare sia il rischio da calore estremo sia la sollecitazione idrogeologica sui versanti già classificati a pericolosità frana." }
+            },
+            ssp585: {
+                2050: { anomaliaTemp: "+2.0°C", giorniCaldi: "+22 giorni", precipEstreme: "+15%", confidenza: "Media",
+                    impatto: "Nello scenario ad alte emissioni, già entro il 2050 si osserva un aumento significativo di ondate di calore e piogge intense, con possibile accentuazione dei fenomeni franosi e di deflusso superficiale nell'area." },
+                2080: { anomaliaTemp: "+3.8°C", giorniCaldi: "+41 giorni", precipEstreme: "+26%", confidenza: "Bassa",
+                    impatto: "A fine secolo nello scenario ad alte emissioni l'incertezza tra i modelli è maggiore, ma la direzione del cambiamento è concorde: più ondate di calore prolungate e piogge più intense, con potenziale aggravamento del rischio idrogeologico rispetto al quadro storico attuale." }
+            }
+        };
+        const climaStoricoAnni = [1995, 2000, 2005, 2010, 2014];
+        const climaStoricoValori = [12.1, 12.3, 12.2, 12.5, 12.6];
+        let chartClimaFuturoInstance = null;
+
+        function aggiornaClimaFuturo() {
+            const selScenario = document.getElementById('climaScenarioSelect');
+            const selPeriodo = document.getElementById('climaPeriodoSelect');
+            if (!selScenario || !selPeriodo) return;
+            const scenario = selScenario.value;
+            const periodo = selPeriodo.value;
+            const dati = climaFuturoData[scenario][periodo];
+
+            document.getElementById('climaAnomaliaTemp').textContent = dati.anomaliaTemp;
+            document.getElementById('climaGiorniCaldi').textContent = dati.giorniCaldi;
+            document.getElementById('climaPrecipEstreme').textContent = dati.precipEstreme;
+            document.getElementById('climaConfidenza').textContent = dati.confidenza;
+            document.getElementById('climaImpattoRischi').textContent = dati.impatto;
+
+            disegnaChartClimaFuturo(scenario, periodo, dati);
+        }
+
+        function disegnaChartClimaFuturo(scenario, periodo, dati) {
+            const ctx = document.getElementById('chartClimaFuturo');
+            if (!ctx) return;
+
+            const baseTemp = climaStoricoValori[climaStoricoValori.length - 1];
+            const anomalia = parseFloat(dati.anomaliaTemp.replace('+', '').replace('°C', ''));
+            const targetAnno = periodo === '2050' ? 2050 : 2080;
+            const targetTemp = baseTemp + anomalia;
+            const bandaIncertezza = dati.confidenza === 'Alta' ? 0.3 : (dati.confidenza === 'Media' ? 0.6 : 1.0);
+
+            const anniProiezione = [2020, targetAnno];
+            const valoriCentrali = [baseTemp, targetTemp];
+            const valoriSup = valoriCentrali.map(v => v + bandaIncertezza);
+            const valoriInf = valoriCentrali.map(v => v - bandaIncertezza);
+
+            if (chartClimaFuturoInstance) chartClimaFuturoInstance.destroy();
+
+            chartClimaFuturoInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [...climaStoricoAnni, ...anniProiezione],
+                    datasets: [
+                        {
+                            label: 'Storico (osservato)',
+                            data: [...climaStoricoValori, null, null],
+                            borderColor: '#003d66',
+                            backgroundColor: 'transparent',
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Proiezione (centrale)',
+                            data: [null, null, null, null, null, baseTemp, targetTemp],
+                            borderColor: '#D32F2F',
+                            borderDash: [6, 4],
+                            backgroundColor: 'transparent',
+                            tension: 0.2
+                        },
+                        {
+                            label: 'Limite superiore incertezza',
+                            data: [null, null, null, null, null, baseTemp + bandaIncertezza, ...valoriSup.slice(1)],
+                            borderColor: 'rgba(211,47,47,0.25)',
+                            backgroundColor: 'rgba(211,47,47,0.08)',
+                            fill: '+1',
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Limite inferiore incertezza',
+                            data: [null, null, null, null, null, baseTemp - bandaIncertezza, ...valoriInf.slice(1)],
+                            borderColor: 'rgba(211,47,47,0.25)',
+                            backgroundColor: 'transparent',
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+                    scales: { y: { title: { display: true, text: 'Temperatura media (°C)' } } }
+                }
+            });
+        }
+
         const copertureRetail = [
             {copertura: "Incendio fabbricato", esposizione_retail: 75, copertura_proposta: 90},
             {copertura: "Danni d'acqua", esposizione_retail: 60, copertura_proposta: 85},
@@ -1380,6 +1549,9 @@
             event.target.classList.add('active');
             if (tabId === 'tab-dinamica-mercato' && mappaLeaflet) {
                 setTimeout(() => { mappaLeaflet.invalidateSize(); if (cerchioRaggio) mappaLeaflet.fitBounds(cerchioRaggio.getBounds(), { padding: [20,20] }); }, 100);
+            }
+            if (tabId === 'tab-clima-futuro' && chartClimaFuturoInstance) {
+                setTimeout(() => chartClimaFuturoInstance.resize(), 100);
             }
         }
         function switchSubTab(event, tabId) {
